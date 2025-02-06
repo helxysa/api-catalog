@@ -1,0 +1,95 @@
+// hello-world/app/controllers/demandas_controller.ts
+import Demanda from '../models/demanda.js'
+import type { HttpContext } from '@adonisjs/core/http'
+import HistoricoDemanda from '../models/historico_demanda.js'
+
+export default class DemandasController {
+  public async index({ response }: HttpContext) {
+    try {
+      const demandas = await Demanda.query().preload('proprietario').preload('alinhamento').preload('prioridade').preload('responsavel').preload('status')
+      return response.ok(demandas)
+    } catch (error) {
+      return response.badRequest(error.message)
+    }
+  }
+
+  public async store({ request, response, auth }: HttpContext) {
+    try {
+      const data = request.only([
+        'proprietario_id', 'nome', 'sigla', 'descricao', 'demandante', 'fator_gerador',
+        'alinhamento_id', 'prioridade_id', 'responsavel_id', 'status_id', 'data_status'
+      ])
+      const demanda = await Demanda.create(data)
+
+      await HistoricoDemanda.create({
+        demanda_id: demanda.id,
+        usuario: auth.user?.email ?? 'sistema',
+        descricao: 'Demanda criada'
+      })
+
+      return response.created(demanda)
+    } catch (error) {
+      return response.badRequest(error.message)
+    }
+  }
+
+  public async show({ params, response }: HttpContext) {
+    try {
+      const demanda = await Demanda.query()
+        .preload('proprietario')
+        .preload('alinhamento')
+        .preload('prioridade')
+        .preload('responsavel')
+        .preload('status')
+        .where('id', params.id)
+        .firstOrFail()
+      return response.ok(demanda)
+    } catch (error) {
+      return response.badRequest(error.message)
+    }
+  }
+
+  public async update({ params, request, response, auth }: HttpContext) {
+    try {
+      const demanda = await Demanda.findOrFail(params.id)
+      const data = request.only(['nome', 'sigla', 'descricao', 'demandante', 'fator_gerador', 'alinhamento_id', 'prioridade_id', 'responsavel_id', 'status_id', 'data_status'])
+      
+      const mudancas = Object.entries(data)
+        .filter(([key, value]) => demanda[key as keyof Demanda] !== value)
+        .map(([key, value]) => `${key}: ${demanda[key as keyof Demanda]} -> ${value}`)
+        .join(', ')
+
+
+      if (mudancas) {
+        await HistoricoDemanda.create({
+          demanda_id: demanda.id,
+          usuario: auth.user?.email ?? 'sistema', 
+          descricao: `Alterações: ${mudancas}`
+        })
+      }
+
+      demanda.merge(data)
+      await demanda.save()
+      return response.ok(demanda)
+    } catch (error) {
+      return response.badRequest(error.message)
+    }
+  }
+
+  public async destroy({ params, response, auth }: HttpContext) {
+    try {
+      const demanda = await Demanda.findOrFail(params.id)
+
+      await HistoricoDemanda.create({
+        demanda_id: demanda.id,
+        usuario: auth.user?.email ?? 'sistema',
+        descricao: 'Demanda excluída'
+      })
+
+      await demanda.delete()
+      return response.noContent()
+    } catch (error) {
+      return response.badRequest(error.message)
+    }
+  }
+}
