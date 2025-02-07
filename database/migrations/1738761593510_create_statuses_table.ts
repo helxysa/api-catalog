@@ -9,7 +9,7 @@ export default class extends BaseSchema {
   
       table.increments('id').primary()
       table.string('nome').notNullable()
-      table.string('descricao')
+      table.string('propriedade')
       table.timestamp('created_at')
       table.timestamp('updated_at')
     })

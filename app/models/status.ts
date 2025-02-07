@@ -11,7 +11,7 @@ export default class Status extends BaseModel {
   declare nome: string
 
   @column()
-  declare descricao: string
+  declare propriedade: string
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime

@@ -10,7 +10,7 @@ export default class LinguagensController {
 
   public async store({ request, response }: HttpContext) {
     try {
-      const data = request.only(['nome', 'descricao'])
+      const data = request.only(['nome', 'propriedade'])
       const status = await Status.create(data)
       return response.created(status)
     } catch (error) {
@@ -30,7 +30,7 @@ export default class LinguagensController {
   public async update({ params, request, response }: HttpContext) {
     try {
       const status = await Status.findOrFail(params.id)
-      const data = request.only(['nome', 'descricao'])
+      const data = request.only(['nome', 'propriedade'])
       status.merge(data)
       await status.save()
       return response.ok(status)
