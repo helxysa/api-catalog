@@ -97,5 +97,6 @@ router.put('/solucoes/:id', [SolucoesController, 'update'])
 router.delete('/solucoes/:id', [SolucoesController, 'destroy'])
 
 router.get('/historico_demandas/:id', [HistoricoDemandasController, 'show'])
+router.get('/historico_demandas', [HistoricoDemandasController, 'index'])
 router.get('/historico_solucoes/:id', [HistoricoSolucoesController, 'show'])
-
+router.get('/historico_solucoes', [HistoricoSolucoesController, 'index'])
