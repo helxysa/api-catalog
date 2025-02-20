@@ -47,6 +47,8 @@ router.get('/categorias/:id', [CategoriasController, 'show'])
 router.put('/categorias/:id', [CategoriasController, 'update'])
 router.delete('/categorias/:id', [CategoriasController, 'destroy'])
 
+router.get('/proprietarios/:proprietarioId/categorias', [CategoriasController, 'indexByProprietario'])
+
 router.get('/linguagens', [LinguagensController, 'index'])
 router.post('/linguagens', [LinguagensController, 'store'])
 router.get('/linguagens/:id', [LinguagensController, 'show'])
