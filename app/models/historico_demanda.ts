@@ -1,8 +1,9 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
+import { BaseModel, belongsTo, column } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import Demanda from './demanda.js'
-
+import Proprietario from './proprietario.js'
+  
 export default class HistoricoDemanda extends BaseModel {
   public static table = 'historico_demandas'
 
@@ -18,6 +19,9 @@ export default class HistoricoDemanda extends BaseModel {
   @column()
   declare descricao: string
 
+  @column()
+  declare proprietario_id: number
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
@@ -28,4 +32,9 @@ export default class HistoricoDemanda extends BaseModel {
     foreignKey: 'demanda_id'
   })
   declare demanda: BelongsTo<typeof Demanda>
+
+  @belongsTo(() => Proprietario, {
+    foreignKey: 'proprietario_id'
+  })
+  declare proprietario: BelongsTo<typeof Proprietario>
 }

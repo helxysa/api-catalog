@@ -10,7 +10,7 @@ import Tipo from './tipo.js'
 import Linguagem from './linguaguem.js'
 import Desenvolvedor from './desenvolvedor.js'
 import Categoria from './categoria.js'
-
+import Proprietario from './proprietario.js'
 export default class Solucao extends BaseModel {
   public static table = 'solucoes'
 
@@ -53,12 +53,19 @@ export default class Solucao extends BaseModel {
   @column()
   declare data_status: string
 
+  @column()
+  declare proprietario_id: number
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
 
+  @belongsTo(() => Proprietario, {
+    foreignKey: 'proprietario_id'
+  })
+  declare proprietario: BelongsTo<typeof Proprietario>
 
   @belongsTo(() => Demanda, {
     foreignKey: 'demanda_id'

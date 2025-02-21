@@ -8,9 +8,10 @@ export default class ResponsaveisController {
     return response.ok(responsaveis)
   }
 
+  
   public async store({ request, response }: HttpContext) {
     try {
-      const data = request.only(['nome', 'email'])
+      const data = request.only(['nome', 'email', 'proprietario_id'])
       const responsavel = await Responsavel.create(data)
       return response.created(responsavel)
     } catch (error) {
@@ -44,6 +45,17 @@ export default class ResponsaveisController {
       const responsavel = await Responsavel.findOrFail(params.id)
       await responsavel.delete()
       return response.noContent()
+    } catch (error) {
+      return response.badRequest(error.message)
+    }
+  }
+
+
+  public async indexByProprietario({ params, response }: HttpContext) {
+    try {
+      const responsaveis = await Responsavel.query()
+        .where('proprietario_id', params.proprietarioId)
+      return response.ok(responsaveis)
     } catch (error) {
       return response.badRequest(error.message)
     }

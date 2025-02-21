@@ -16,7 +16,7 @@ export default class DemandasController {
   public async store({ request, response, auth }: HttpContext) {
     try {
       const data = request.only([
-        'demanda_id', 'nome', 'sigla', 'descricao', 'versao', 'tipo_id', 'linguagem_id', 'desenvolvedor_id', 'responsavel_id', 'status_id', 'categoria_id'
+        'demanda_id', 'nome', 'sigla', 'descricao', 'versao', 'tipo_id', 'linguagem_id', 'desenvolvedor_id', 'responsavel_id', 'status_id', 'categoria_id', 'proprietario_id'
       ])
       const solucao = await Solucao.create(data)
 
@@ -89,6 +89,15 @@ export default class DemandasController {
 
       await solucao.delete()
       return response.noContent()
+    } catch (error) {
+      return response.badRequest(error.message)
+    }
+  }
+
+  public async indexByProprietario({ params, response }: HttpContext) {
+    try {
+      const solucoes = await Solucao.query().where('proprietario_id', params.proprietarioId)
+      return response.ok(solucoes)
     } catch (error) {
       return response.badRequest(error.message)
     }

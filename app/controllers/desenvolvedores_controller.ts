@@ -10,7 +10,7 @@ export default class DesenvolvedoresController {
 
   public async store({ request, response }: HttpContext) {
     try {
-      const data = request.only(['nome', 'email'])
+      const data = request.only(['nome', 'email', 'proprietario_id'])
       const desenvolvedor = await Desenvolvedor.create(data)
       return response.created(desenvolvedor)
     } catch (error) {
@@ -48,4 +48,18 @@ export default class DesenvolvedoresController {
       return response.badRequest(error.message)
     }
   }
+
+
+  public async indexByProprietario({ params, response }: HttpContext) {
+    try {
+      const desenvolvedores = await Desenvolvedor.query()
+        .where('proprietario_id', params.proprietarioId)
+      return response.ok(desenvolvedores)
+    } catch (error) {
+      return response.badRequest(error.message)
+    }
+  }
 }
+
+
+

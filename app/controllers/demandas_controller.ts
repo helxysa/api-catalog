@@ -92,4 +92,13 @@ export default class DemandasController {
       return response.badRequest(error.message)
     }
   }
+
+  public async indexByProprietario({ params, response }: HttpContext) {
+    try {
+      const demandas = await Demanda.query().where('proprietario_id', params.proprietarioId)
+      return response.ok(demandas)
+    } catch (error) {
+      return response.badRequest(error.message)
+    }
+  }
 }

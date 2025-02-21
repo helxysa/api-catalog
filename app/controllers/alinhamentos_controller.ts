@@ -10,10 +10,25 @@ export default class AlinhamentosController {
 
   public async store({ request, response }: HttpContext) {
     try {
-      const data = request.only(['nome', 'descricao'])
+      const data = request.only(['nome', 'descricao', 'proprietario_id'])
+      console.log('Dados recebidos no backend:', data) // Debug
+      
+      if (!data.nome) {
+        return response.badRequest('Nome é obrigatório')
+      }
+      
+      if (!data.proprietario_id) {
+        return response.badRequest('proprietario_id é obrigatório')
+      }
+
+      // Garantir que proprietario_id seja número
+      data.proprietario_id = Number(data.proprietario_id)
+      console.log('Dados após conversão:', data) // Debug
+
       const alinhamento = await Alinhamento.create(data)
       return response.created(alinhamento)
     } catch (error) {
+      console.error('Erro detalhado:', error) // Debug
       return response.badRequest(error.message)
     }
   }
@@ -48,4 +63,19 @@ export default class AlinhamentosController {
       return response.badRequest(error.message)
     }
   }
+
+
+  public async indexByProprietario({ params, response }: HttpContext) {
+    try {
+      const alinhamentos = await Alinhamento.query()
+        .where('proprietario_id', params.proprietarioId)
+      return response.ok(alinhamentos)
+    } catch (error) {
+      return response.badRequest(error.message)
+    }
+  }
 }
+
+
+
+

@@ -8,6 +8,7 @@ export default class extends BaseSchema {
    this.schema.createTable(this.tableName, (table) => {
       table.increments('id').primary()
       table.integer('demanda_id').unsigned().references('id').inTable('demandas').onDelete('CASCADE')
+      table.integer('proprietario_id').unsigned().references('id').inTable('proprietarios').onDelete('CASCADE')
       table.string('usuario')
       table.text('descricao')
       table.timestamp('created_at')

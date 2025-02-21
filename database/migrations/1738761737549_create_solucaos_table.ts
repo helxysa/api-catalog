@@ -18,6 +18,7 @@ export default class extends BaseSchema {
       table.integer('categoria_id').unsigned().references('id').inTable('categorias').onDelete('SET NULL')
       table.integer('responsavel_id').unsigned().references('id').inTable('responsaveis').onDelete('SET NULL')
       table.integer('status_id').unsigned().references('id').inTable('status').onDelete('SET NULL')
+      table.integer('proprietario_id').unsigned().references('id').inTable('proprietarios').onDelete('CASCADE')
       table.string('data_status')
       table.timestamp('created_at')
       table.timestamp('updated_at')

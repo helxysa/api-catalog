@@ -1,6 +1,6 @@
 
 import type { HttpContext } from '@adonisjs/core/http'
-import Tipo from '../models/tipo.js'
+import Tipo from '../models/tipo.js'  
 
 export default class LinguagensController {
   public async index({ response }: HttpContext) {
@@ -10,7 +10,7 @@ export default class LinguagensController {
 
   public async store({ request, response }: HttpContext) {
     try {
-      const data = request.only(['nome', 'descricao'])
+      const data = request.only(['nome', 'descricao', 'proprietario_id'])
       const tipo = await Tipo.create(data)
       return response.created(tipo)
     } catch (error) {
@@ -44,6 +44,16 @@ export default class LinguagensController {
       const tipo = await Tipo.findOrFail(params.id)
       await tipo.delete()
       return response.noContent()
+    } catch (error) {
+      return response.badRequest(error.message)
+    }
+  }
+
+  public async indexByProprietario({ params, response }: HttpContext) {
+    try {
+      const tipos = await Tipo.query()
+        .where('proprietario_id', params.proprietarioId)
+      return response.ok(tipos)
     } catch (error) {
       return response.badRequest(error.message)
     }

@@ -10,7 +10,7 @@ export default class LinguagensController {
 
   public async store({ request, response }: HttpContext) {
     try {
-      const data = request.only(['nome', 'propriedade'])
+      const data = request.only(['nome', 'propriedade', 'proprietario_id'])
       const status = await Status.create(data)
       return response.created(status)
     } catch (error) {
@@ -44,6 +44,16 @@ export default class LinguagensController {
       const status = await Status.findOrFail(params.id)
       await status.delete()
       return response.noContent()
+    } catch (error) {
+      return response.badRequest(error.message)
+    }
+  }
+
+  public async indexByProprietario({ params, response }: HttpContext) {
+    try {
+      const statuses = await Status.query()
+        .where('proprietario_id', params.proprietarioId)
+      return response.ok(statuses)
     } catch (error) {
       return response.badRequest(error.message)
     }

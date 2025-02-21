@@ -63,4 +63,14 @@ export default class CategoriasController {
       return response.badRequest(error.message)
     }
   }
+
+  public async indexByProprietario({ params, response }: HttpContext) {
+    try {
+      const categorias = await Categoria.query()
+        .where('proprietario_id', params.proprietarioId)
+      return response.ok(categorias)
+    } catch (error) {
+      return response.badRequest(error.message)
+    }
+  }
 }

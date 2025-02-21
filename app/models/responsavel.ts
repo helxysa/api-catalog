@@ -1,5 +1,7 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column } from '@adonisjs/lucid/orm'
+import { BaseModel, belongsTo, column } from '@adonisjs/lucid/orm'
+import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import Proprietario from './proprietario.js'
 
 export default class Responsavel extends BaseModel {
 
@@ -13,6 +15,12 @@ export default class Responsavel extends BaseModel {
 
   @column()
   declare email: string
+
+  @column()
+  declare proprietario_id: number
+
+  @belongsTo(() => Proprietario)
+  declare proprietario: BelongsTo<typeof Proprietario>
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime

@@ -10,6 +10,7 @@ export default class extends BaseSchema {
       table.increments('id').primary()
       table.string('nome').notNullable()
       table.string('propriedade')
+      table.integer('proprietario_id').unsigned().references('id').inTable('proprietarios').onDelete('CASCADE')
       table.timestamp('created_at')
       table.timestamp('updated_at')
     })

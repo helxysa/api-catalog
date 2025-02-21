@@ -4,7 +4,7 @@ import HistoricoDemanda from '../models/historico_demanda.js'
 export default class HistoricoDemandasController {
   public async index({ response }: HttpContext) {
     try {
-      const historicoDemandas = await HistoricoDemanda.query().preload('demanda')
+      const historicoDemandas = await HistoricoDemanda.query().preload('demanda').preload('proprietario')
       return response.ok(historicoDemandas)
     } catch (error) {
       return response.badRequest(error.message)
@@ -13,7 +13,7 @@ export default class HistoricoDemandasController {
 
   public async store({ request, response }: HttpContext) {
     try {
-      const data = request.only(['demanda_id', 'usuario', 'descricao'])
+      const data = request.only(['demanda_id', 'usuario', 'descricao', 'proprietario_id'])
       const historicoDemanda = await HistoricoDemanda.create(data)
       return response.created(historicoDemanda)
     } catch (error) {
@@ -36,6 +36,15 @@ export default class HistoricoDemandasController {
       historicoDemanda.merge(request.only(['descricao']))
       await historicoDemanda.save()
       return response.ok(historicoDemanda)
+    } catch (error) {
+      return response.badRequest(error.message)
+    }
+  }
+
+  public async indexByProprietario({ params, response }: HttpContext) {
+    try {
+      const historicoDemandas = await HistoricoDemanda.query().where('proprietario_id', params.proprietarioId)
+      return response.ok(historicoDemandas)
     } catch (error) {
       return response.badRequest(error.message)
     }
