@@ -8,6 +8,10 @@
 */
 
 import router from '@adonisjs/core/services/router'
+import { middleware } from './kernel.js'
+import { createReadStream } from 'node:fs'
+import { join } from 'node:path'
+import { cwd } from 'node:process'
 
 import AlinhamentosController from '../app/controllers/alinhamentos_controller.js'
 import CategoriasController from '../app/controllers/categorias_controller.js'
@@ -49,7 +53,6 @@ router.get('/categorias/:id', [CategoriasController, 'show'])
 router.put('/categorias/:id', [CategoriasController, 'update'])
 router.delete('/categorias/:id', [CategoriasController, 'destroy'])
 router.get('/proprietarios/:proprietarioId/categorias', [CategoriasController, 'indexByProprietario'])
-
 
 router.get('/linguagens', [LinguagensController, 'index'])
 router.post('/linguagens', [LinguagensController, 'store'])
@@ -110,3 +113,13 @@ router.get('/proprietarios/:proprietarioId/historico_demandas', [HistoricoDemand
 router.get('/historico_demandas', [HistoricoDemandasController, 'index'])
 router.get('/historico_solucoes/:id', [HistoricoSolucoesController, 'show'])
 router.get('/historico_solucoes', [HistoricoSolucoesController, 'index'])
+
+// Serve logo images
+router.get('/tmp/upload/logo/:filename', async ({ params, response }) => {
+  try {
+    const filePath = join(cwd(), 'tmp', 'upload', 'logo', params.filename)
+    return response.stream(createReadStream(filePath))
+  } catch (error) {
+    return response.notFound('Image not found')
+  }
+})

@@ -20,9 +20,8 @@ export default class Proprietario extends BaseModel {
   @column()
   declare descricao: string
 
-     
   @column()
-  declare logo: string
+  declare logo: string 
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
