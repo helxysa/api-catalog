@@ -93,6 +93,7 @@ router.post('/proprietarios', [ProprietariosController, 'store'])
 router.get('/proprietarios/:id', [ProprietariosController, 'show'])
 router.put('/proprietarios/:id', [ProprietariosController, 'update'])
 router.delete('/proprietarios/:id', [ProprietariosController, 'destroy'])
+router.post('/proprietarios/:id/clone', [ProprietariosController, 'clone'])
 
 router.get('/demandas', [DemandasController, 'index'])
 router.post('/demandas', [DemandasController, 'store'])

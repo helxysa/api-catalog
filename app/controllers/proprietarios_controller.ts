@@ -3,6 +3,7 @@ import Proprietario from '#models/proprietario'
 import { mkdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import { cwd } from 'node:process'
+import { copyFile } from 'node:fs/promises'
 
 export default class ResponsaveisController {
   private async ensureUploadDirectory() {
@@ -130,6 +131,50 @@ export default class ResponsaveisController {
       const proprietario = await Proprietario.findOrFail(params.id)
       await proprietario.delete()
       return response.noContent()
+    } catch (error) {
+      return response.badRequest(error.message)
+    }
+  }
+
+  public async clone({ params, response }: HttpContext) {
+    try {
+      // Encontrar o proprietário original
+      const originalProprietario = await Proprietario.findOrFail(params.id)
+      
+      // Criar novo nome e sigla para o clone
+      const newNome = `${originalProprietario.nome} (Cópia)`
+      const newSigla = `${originalProprietario.sigla}_COPY`
+
+      // Preparar o novo logo se existir
+      let newLogoFileName: string | undefined = undefined
+      if (originalProprietario.logo) {
+        const uploadDir = await this.ensureUploadDirectory()
+        newLogoFileName = `copy-${Date.now()}-${originalProprietario.logo}`
+        
+        // Copiar o arquivo de logo
+        try {
+          await copyFile(
+            join(cwd(), 'tmp', 'upload', 'logo', originalProprietario.logo),
+            join(uploadDir, newLogoFileName)
+          )
+        } catch (error) {
+          console.error('Error copying logo:', error)
+          newLogoFileName = undefined
+        }
+      }
+
+      // Criar o novo proprietário
+      const newProprietario = await Proprietario.create({
+        nome: newNome,
+        sigla: newSigla,
+        descricao: originalProprietario.descricao,
+        logo: newLogoFileName
+      })
+
+      return response.created({
+        ...newProprietario.toJSON(),
+        logo: this.getLogoUrl(newProprietario.logo)
+      })
     } catch (error) {
       return response.badRequest(error.message)
     }
