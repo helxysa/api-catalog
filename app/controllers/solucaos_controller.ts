@@ -6,7 +6,13 @@ import HistoricoSolucao from '../models/historico_solucao.js'
 export default class DemandasController {
   public async index({ response }: HttpContext) {
     try {
-      const solucoes = await Solucao.query().preload('demanda').preload('tipo').preload('linguagem').preload('desenvolvedor').preload('responsavel').preload('status').preload('categoria')
+      const solucoes = await Solucao.query()
+        .preload('demanda')
+        .preload('tipo')
+        .preload('desenvolvedor')
+        .preload('responsavel')
+        .preload('status')
+        .preload('categoria')
       return response.ok(solucoes)
     } catch (error) {
       return response.badRequest(error.message)
@@ -37,7 +43,6 @@ export default class DemandasController {
       const solucao = await Solucao.query()
         .preload('demanda')
         .preload('tipo')
-        .preload('linguagem')
         .preload('desenvolvedor')
         .preload('responsavel')
         .preload('status')
