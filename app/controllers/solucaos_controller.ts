@@ -2,6 +2,7 @@
 import Solucao from '../models/solucao.js'
 import type { HttpContext } from '@adonisjs/core/http'
 import HistoricoSolucao from '../models/historico_solucao.js'
+import Linguaguem from '../models/linguaguem.js'
 
 export default class DemandasController {
   public async index({ response }: HttpContext) {
@@ -41,17 +42,34 @@ export default class DemandasController {
   public async show({ params, response }: HttpContext) {
     try {
       const solucao = await Solucao.query()
+        .where('id', params.id)
         .preload('demanda')
         .preload('tipo')
         .preload('desenvolvedor')
         .preload('responsavel')
         .preload('status')
         .preload('categoria')
-        .where('id', params.id)
         .firstOrFail()
-      return response.ok(solucao)
+
+      // Buscamos as linguagens
+      const linguagemIds = solucao.linguagem_id 
+        ? String(solucao.linguagem_id).split(',').map(id => Number(id.trim()))
+        : [];
+
+      const linguagens = await Linguaguem.query()
+        .whereIn('id', linguagemIds)
+
+      return response.ok({
+        ...solucao.toJSON(),
+        linguagens: linguagens,
+        linguagem_ids: linguagemIds
+      })
+
     } catch (error) {
-      return response.badRequest(error.message)
+      return response.notFound({
+        message: 'Solução não encontrada',
+        error: error.message
+      })
     }
   }
 
@@ -101,10 +119,60 @@ export default class DemandasController {
 
   public async indexByProprietario({ params, response }: HttpContext) {
     try {
-      const solucoes = await Solucao.query().where('proprietario_id', params.proprietarioId)
-      return response.ok(solucoes)
+      if (!params.proprietarioId) {
+        return response.status(400).json({
+          message: 'ID do proprietário é obrigatório'
+        })
+      }
+
+      // Primeiro, buscamos todas as soluções
+      const solucoes = await Solucao.query()
+        .where('proprietario_id', params.proprietarioId)
+        .preload('demanda', (query) => {
+          query.preload('proprietario')
+        })
+        .preload('tipo')
+        .preload('desenvolvedor')
+        .preload('responsavel')
+        .preload('status')
+        .preload('categoria')
+
+      // Agora vamos buscar todas as linguagens uma única vez
+      const todasLinguagens = await Linguaguem.query()
+        .where('proprietario_id', params.proprietarioId)
+
+      // Mapeamos as soluções para incluir as linguagens corretas
+      const solucoesComLinguagens = solucoes.map(solucao => {
+        // Convertemos a string de IDs em array de números
+        const linguagemIds = solucao.linguagem_id 
+          ? String(solucao.linguagem_id).split(',').map(id => Number(id.trim()))
+          : [];
+
+        // Filtramos as linguagens que correspondem aos IDs
+        const linguagens = todasLinguagens.filter(lang => 
+          linguagemIds.includes(lang.id)
+        );
+
+        // Retornamos a solução com as linguagens como um array
+        return {
+          ...solucao.toJSON(),
+          linguagens: linguagens, // Array de objetos de linguagem
+          linguagem_ids: linguagemIds // Array de IDs numéricos
+        }
+      })
+
+      return response.ok({
+        status: 'success',
+        data: solucoesComLinguagens
+      })
+
     } catch (error) {
-      return response.badRequest(error.message)
+      console.error('Erro ao buscar soluções por proprietário:', error)
+      return response.status(500).json({
+        status: 'error',
+        message: 'Erro ao buscar soluções por proprietário',
+        error: error.message
+      })
     }
   }
 }
