@@ -25,6 +25,7 @@ import DemandasController from '../app/controllers/demandas_controller.js'
 import HistoricoDemandasController from '../app/controllers/historico_demandas_controller.js'
 import SolucoesController from '../app/controllers/solucaos_controller.js'
 import HistoricoSolucoesController from '../app/controllers/historico_solucaos_controller.js'
+import TimesController from '#controllers/times_controller'
 
 router.get('/', async () => {
   return {
@@ -59,6 +60,17 @@ router.get('/linguagens/:id', [LinguagensController, 'show'])
 router.put('/linguagens/:id', [LinguagensController, 'update'])
 router.delete('/linguagens/:id', [LinguagensController, 'destroy'])
 router.get('/proprietarios/:proprietarioId/linguagens', [LinguagensController, 'indexByProprietario'])
+
+
+
+router.get('/times', [TimesController, 'index'])
+router.post('/times', [TimesController, 'store'])
+router.get('/times/:id', [TimesController, 'show'])
+router.put('/times/:id', [TimesController, 'update'])
+router.delete('/times/:id', [TimesController, 'destroy'])
+router.get('/proprietarios/:proprietarioId/times', [TimesController, 'indexByProprietario'])
+
+
 
 router.get('/tipos', [TiposController, 'index'])
 router.post('/tipos', [TiposController, 'store'])
