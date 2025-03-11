@@ -4,9 +4,19 @@ import type { HttpContext } from '@adonisjs/core/http'
 import HistoricoDemanda from '../models/historico_demanda.js'
 
 export default class DemandasController {
-  public async index({ response }: HttpContext) {
+  public async index({ response, request }: HttpContext) {
     try {
-      const demandas = await Demanda.query().preload('proprietario').preload('alinhamento').preload('prioridade').preload('responsavel').preload('status')
+      const page = request.input('page', 1)
+      const limit = request.input('limit', 8)
+      
+      const demandas = await Demanda.query()
+        .preload('proprietario')
+        .preload('alinhamento')
+        .preload('prioridade')
+        .preload('responsavel')
+        .preload('status')
+        .paginate(page, limit)
+        
       return response.ok(demandas)
     } catch (error) {
       return response.badRequest(error.message)
@@ -99,6 +109,48 @@ export default class DemandasController {
       return response.ok(demandas)
     } catch (error) {
       return response.badRequest(error.message)
+    }
+  }
+
+  public async all({ response }: HttpContext) {
+    try {
+      const demandas = await Demanda.query()
+        .preload('proprietario')
+        .preload('alinhamento')
+        .preload('prioridade')
+        .preload('responsavel')
+        .preload('status')
+        .orderBy('created_at', 'desc')
+        
+      return response.ok(demandas)
+    } catch (error) {
+      console.error('Error in all demandas:', error)
+      return response.status(500).json({
+        error: 'Erro ao buscar todas as demandas',
+        details: error.message
+      })
+    }
+  }
+
+  public async getAllByProprietario({ params, response }: HttpContext) {
+    try {
+      const proprietarioId = params.proprietarioId;
+      
+      const demandas = await Demanda.query()
+        .where('proprietario_id', proprietarioId)
+        .preload('proprietario')
+        .preload('alinhamento')
+        .preload('prioridade')
+        .preload('responsavel')
+        .preload('status')
+        
+      return response.ok(demandas)
+    } catch (error) {
+      console.error('Erro ao buscar todas as demandas:', error)
+      return response.status(500).json({
+        error: 'Erro ao buscar todas as demandas',
+        details: error.message
+      })
     }
   }
 }

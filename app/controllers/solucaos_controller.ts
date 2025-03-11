@@ -5,8 +5,11 @@ import HistoricoSolucao from '../models/historico_solucao.js'
 import Linguaguem from '../models/linguaguem.js'
 
 export default class DemandasController {
-  public async index({ response }: HttpContext) {
+  public async index({ response, request }: HttpContext) {
     try {
+      const page = request.input('page', 1)
+      const limit = request.input('limit', 6)
+      
       const solucoes = await Solucao.query()
         .preload('demanda')
         .preload('tipo')
@@ -14,6 +17,8 @@ export default class DemandasController {
         .preload('responsavel')
         .preload('status')
         .preload('categoria')
+        .paginate(page, limit)
+        
       return response.ok(solucoes)
     } catch (error) {
       return response.badRequest(error.message)
@@ -172,6 +177,35 @@ export default class DemandasController {
         status: 'error',
         message: 'Erro ao buscar soluções por proprietário',
         error: error.message
+      })
+    }
+  }
+
+  // Novo método específico para o dashboard
+  public async getAllByProprietario({ params, response }: HttpContext) {
+    try {
+      const proprietarioId = params.proprietarioId;
+      
+      // Busca todas as soluções relacionadas às demandas do proprietário
+      const solucoes = await Solucao.query()
+        .whereIn('demanda_id', (query) => {
+          query.select('id')
+            .from('demandas')
+            .where('proprietario_id', proprietarioId)
+        })
+        .preload('demanda')
+        .preload('tipo')
+        .preload('desenvolvedor')
+        .preload('responsavel')
+        .preload('status')
+        .preload('categoria')
+        
+      return response.ok(solucoes)
+    } catch (error) {
+      console.error('Erro ao buscar todas as soluções:', error)
+      return response.status(500).json({
+        error: 'Erro ao buscar todas as soluções',
+        details: error.message
       })
     }
   }

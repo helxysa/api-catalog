@@ -8,7 +8,6 @@
 */
 
 import router from '@adonisjs/core/services/router'
-import { middleware } from './kernel.js'
 import { createReadStream } from 'node:fs'
 import { join } from 'node:path'
 import { cwd } from 'node:process'
@@ -29,7 +28,7 @@ import HistoricoSolucoesController from '../app/controllers/historico_solucaos_c
 
 router.get('/', async () => {
   return {
-    hello: 'world',
+    hello: 'ministério publico',
   }
 })
 
@@ -95,6 +94,8 @@ router.put('/proprietarios/:id', [ProprietariosController, 'update'])
 router.delete('/proprietarios/:id', [ProprietariosController, 'destroy'])
 router.post('/proprietarios/:id/clone', [ProprietariosController, 'clone'])
 
+router.get('/demandas/all', [DemandasController, 'all'])
+
 router.get('/demandas', [DemandasController, 'index'])
 router.post('/demandas', [DemandasController, 'store'])
 router.get('/demandas/:id', [DemandasController, 'show'])
@@ -114,6 +115,12 @@ router.get('/proprietarios/:proprietarioId/historico_demandas', [HistoricoDemand
 router.get('/historico_demandas', [HistoricoDemandasController, 'index'])
 router.get('/historico_solucoes/:id', [HistoricoSolucoesController, 'show'])
 router.get('/historico_solucoes', [HistoricoSolucoesController, 'index'])
+
+// rotas sem paginação para o dashboard
+router.get('/proprietarios/:proprietarioId/dashboard/solucoes', [SolucoesController, 'getAllByProprietario'])
+router.get('/proprietarios/:proprietarioId/dashboard/demandas', [DemandasController, 'getAllByProprietario'])
+
+
 
 // Serve logo images
 router.get('/tmp/upload/logo/:filename', async ({ params, response }) => {
