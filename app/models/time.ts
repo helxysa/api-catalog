@@ -8,14 +8,9 @@ export default class Time extends BaseModel {
 
   @column({ isPrimary: true })
   declare id: number
-
   
   @column()
   declare nome: string
-
-  
-  @column()
-  declare funcao: string
 
   @column()
   declare descricao: string

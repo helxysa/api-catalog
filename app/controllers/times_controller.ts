@@ -10,13 +10,8 @@ export default class TimesController {
 
   public async store({ request, response }: HttpContext) {
     try {
-      const data = request.only(['nome', 'funcao', 'descricao', 'proprietario_id'])
+      const data = request.only(['nome', 'descricao', 'proprietario_id'])
       console.log('Dados recebidos no backend:', data) // Debug
-      
-      // Validação mais detalhada
-      if (!data.nome) {
-        return response.badRequest('Nome é obrigatório')
-      }
       
       if (!data.proprietario_id) {
         return response.badRequest('proprietario_id é obrigatório')
@@ -47,7 +42,7 @@ export default class TimesController {
   public async update({ params, request, response }: HttpContext) {
     try {
       const linguagem = await Time.findOrFail(params.id)
-      const data = request.only(['nome', 'funcao','descricao'])
+      const data = request.only(['nome','descricao'])
       linguagem.merge(data)
       await linguagem.save()
       return response.ok(linguagem)

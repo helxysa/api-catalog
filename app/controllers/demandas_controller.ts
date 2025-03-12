@@ -7,7 +7,7 @@ export default class DemandasController {
   public async index({ response, request }: HttpContext) {
     try {
       const page = request.input('page', 1)
-      const limit = request.input('limit', 8)
+      const limit = request.input('limit', 6)
       
       const demandas = await Demanda.query()
         .preload('proprietario')

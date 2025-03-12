@@ -11,6 +11,9 @@ import Linguagem from './linguaguem.js'
 import Desenvolvedor from './desenvolvedor.js'
 import Categoria from './categoria.js'
 import Proprietario from './proprietario.js'
+import Time from './time.js'
+
+
 export default class Solucao extends BaseModel {
   public static table = 'solucoes'
 
@@ -31,6 +34,9 @@ export default class Solucao extends BaseModel {
 
   @column()
   declare versao: string
+
+  @column()
+  declare repositorio: string
 
   @column()
   declare tipo_id: number
@@ -81,6 +87,12 @@ export default class Solucao extends BaseModel {
     foreignKey: 'linguagem_id'
   })
   declare linguagem: BelongsTo<typeof Linguagem>
+
+  @belongsTo(() => Time, {
+    foreignKey: 'times_id'
+  })
+  declare time: BelongsTo<typeof Time>
+
 
   @belongsTo(() => Categoria, {
     foreignKey: 'categoria_id'

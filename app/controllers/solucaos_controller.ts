@@ -28,8 +28,13 @@ export default class DemandasController {
   public async store({ request, response, auth }: HttpContext) {
     try {
       const data = request.only([
-        'demanda_id', 'nome', 'sigla', 'descricao', 'versao', 'tipo_id', 'linguagem_id', 'desenvolvedor_id', 'responsavel_id', 'status_id', 'categoria_id', 'proprietario_id'
+        'demanda_id', 'nome', 'sigla', 'descricao', 'versao', 'repositorio', 'tipo_id', 'linguagem_id', 'desenvolvedor_id', 'responsavel_id', 'status_id', 'categoria_id', 'proprietario_id', 'data_status'
       ])
+      
+      if (!data.data_status) {
+        data.data_status = new Date().toISOString().split('T')[0];
+      }
+      
       const solucao = await Solucao.create(data)
 
       await HistoricoSolucao.create({
@@ -81,7 +86,9 @@ export default class DemandasController {
   public async update({ params, request, response, auth }: HttpContext) {
     try {
       const solucao = await Solucao.findOrFail(params.id)
-      const data = request.only(['nome', 'sigla', 'descricao', 'versao', 'tipo_id', 'linguagem_id', 'desenvolvedor_id', 'responsavel_id', 'status_id', 'categoria_id'])
+      const data = request.only([
+        'nome', 'sigla', 'descricao', 'versao', 'repositorio', 'tipo_id', 'linguagem_id', 'desenvolvedor_id', 'responsavel_id', 'status_id', 'categoria_id', 'data_status'
+      ])
       
       const mudancas = Object.entries(data)
         .filter(([key, value]) => solucao[key as keyof Solucao] !== value)

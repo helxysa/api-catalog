@@ -12,6 +12,7 @@ export default class extends BaseSchema {
       table.string('sigla')
       table.string('descricao')
       table.string('versao')
+      table.string('repositorio')
       table.integer('tipo_id').unsigned().references('id').inTable('tipos').onDelete('SET NULL')
       table.integer('linguagem_id').unsigned().references('id').inTable('linguaguens').onDelete('SET NULL')
       table.integer('desenvolvedor_id').unsigned().references('id').inTable('desenvolvedores').onDelete('SET NULL')

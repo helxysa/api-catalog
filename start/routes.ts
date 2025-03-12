@@ -132,7 +132,8 @@ router.get('/historico_solucoes', [HistoricoSolucoesController, 'index'])
 router.get('/proprietarios/:proprietarioId/dashboard/solucoes', [SolucoesController, 'getAllByProprietario'])
 router.get('/proprietarios/:proprietarioId/dashboard/demandas', [DemandasController, 'getAllByProprietario'])
 
-
+// Adicione esta nova rota antes do final do arquivo
+router.get('/proprietarios/:proprietarioId/relatorios/demandas', [DemandasController, 'getAllByProprietario'])
 
 // Serve logo images
 router.get('/tmp/upload/logo/:filename', async ({ params, response }) => {
