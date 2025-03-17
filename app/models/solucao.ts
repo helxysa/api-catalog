@@ -39,6 +39,12 @@ export default class Solucao extends BaseModel {
   declare repositorio: string
 
   @column()
+  declare link: string
+
+  @column()
+  declare andamento: string
+
+  @column()
   declare tipo_id: number
 
   @column()

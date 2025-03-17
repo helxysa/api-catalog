@@ -8,7 +8,7 @@ export default class DemandasController {
     try {
       const page = request.input('page', 1)
       const limit = request.input('limit', 6)
-      
+
       const demandas = await Demanda.query()
         .preload('proprietario')
         .preload('alinhamento')
@@ -16,7 +16,7 @@ export default class DemandasController {
         .preload('responsavel')
         .preload('status')
         .paginate(page, limit)
-        
+
       return response.ok(demandas)
     } catch (error) {
       return response.badRequest(error.message)
@@ -27,9 +27,9 @@ export default class DemandasController {
     try {
       const data = request.only([
         'proprietario_id', 'nome', 'sigla', 'descricao', 'demandante', 'fator_gerador',
-        'alinhamento_id', 'prioridade_id', 'responsavel_id', 'status_id', 'data_status'
-      ])
-      const demanda = await Demanda.create(data)
+        'alinhamento_id', 'prioridade_id', 'responsavel_id', 'status_id', 'data_status', 'link'
+      ]);
+      const demanda = await Demanda.create(data);
 
       await HistoricoDemanda.create({
         demanda_id: demanda.id,
@@ -62,8 +62,12 @@ export default class DemandasController {
   public async update({ params, request, response, auth }: HttpContext) {
     try {
       const demanda = await Demanda.findOrFail(params.id)
-      const data = request.only(['nome', 'sigla', 'descricao', 'demandante', 'fator_gerador', 'alinhamento_id', 'prioridade_id', 'responsavel_id', 'status_id', 'data_status'])
-      
+      const data = request.only([
+        'nome', 'sigla', 'descricao', 'demandante', 'fator_gerador', 
+        'alinhamento_id', 'prioridade_id', 'responsavel_id', 
+        'status_id', 'data_status', 'link'  // Adicionado o campo link
+      ])
+
       const mudancas = Object.entries(data)
         .filter(([key, value]) => demanda[key as keyof Demanda] !== value)
         .map(([key, value]) => `${key}: ${demanda[key as keyof Demanda]} -> ${value}`)
@@ -73,7 +77,7 @@ export default class DemandasController {
       if (mudancas) {
         await HistoricoDemanda.create({
           demanda_id: demanda.id,
-          usuario: auth.user?.email ?? 'sistema', 
+          usuario: auth.user?.email ?? 'sistema',
           descricao: `Alterações: ${mudancas}`
         })
       }
@@ -121,7 +125,7 @@ export default class DemandasController {
         .preload('responsavel')
         .preload('status')
         .orderBy('created_at', 'desc')
-        
+
       return response.ok(demandas)
     } catch (error) {
       console.error('Error in all demandas:', error)
@@ -135,7 +139,7 @@ export default class DemandasController {
   public async getAllByProprietario({ params, response }: HttpContext) {
     try {
       const proprietarioId = params.proprietarioId;
-      
+
       const demandas = await Demanda.query()
         .where('proprietario_id', proprietarioId)
         .preload('proprietario')
@@ -143,7 +147,7 @@ export default class DemandasController {
         .preload('prioridade')
         .preload('responsavel')
         .preload('status')
-        
+
       return response.ok(demandas)
     } catch (error) {
       console.error('Erro ao buscar todas as demandas:', error)

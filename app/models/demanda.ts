@@ -33,6 +33,9 @@ export default class Demanda extends BaseModel {
   declare fator_gerador: string
 
   @column()
+  declare link: string
+
+  @column()
   declare alinhamento_id: number
 
   @column()

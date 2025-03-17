@@ -11,6 +11,7 @@ export default class extends BaseSchema {
       table.string('sigla')
       table.string('descricao')
       table.string('demandante')
+      table.string('link')
       table.string('fator_gerador')
       table.integer('alinhamento_id').unsigned().references('id').inTable('alinhamentos').onDelete('SET NULL')
       table.integer('prioridade_id').unsigned().references('id').inTable('prioridades').onDelete('SET NULL')

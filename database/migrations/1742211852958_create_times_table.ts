@@ -5,9 +5,11 @@ export default class extends BaseSchema {
 
   async up() {
     this.schema.createTable(this.tableName, (table) => {
-      table.increments('id').primary()
+      table.increments('id')
       table.string('nome')
-      table.string('descricao')
+      table.string('funcao')
+      table.string('data_inicio')
+      table.string('data_fim')
       table.integer('proprietario_id').unsigned().references('id').inTable('proprietarios').onDelete('CASCADE')
       table.timestamp('created_at')
       table.timestamp('updated_at')
@@ -18,4 +20,3 @@ export default class extends BaseSchema {
     this.schema.dropTable(this.tableName)
   }
 }
-

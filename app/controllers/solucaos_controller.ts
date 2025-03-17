@@ -28,14 +28,33 @@ export default class DemandasController {
   public async store({ request, response, auth }: HttpContext) {
     try {
       const data = request.only([
-        'demanda_id', 'nome', 'sigla', 'descricao', 'versao', 'repositorio', 'tipo_id', 'linguagem_id', 'desenvolvedor_id', 'responsavel_id', 'status_id', 'categoria_id', 'proprietario_id', 'data_status'
+        'demanda_id', 
+        'nome', 
+        'sigla', 
+        'descricao', 
+        'versao', 
+        'link',
+        'andamento',
+        'repositorio', 
+        'tipo_id', 
+        'linguagem_id', 
+        'desenvolvedor_id', 
+        'responsavel_id', 
+        'status_id', 
+        'categoria_id', 
+        'proprietario_id', 
+        'data_status'
       ])
+      
+      // Log para debug
+      console.log('Received data:', data);
       
       if (!data.data_status) {
         data.data_status = new Date().toISOString().split('T')[0];
       }
       
       const solucao = await Solucao.create(data)
+      console.log('Created solution:', solucao); // Log para debug
 
       await HistoricoSolucao.create({
         solucao_id: solucao.id,
@@ -45,7 +64,11 @@ export default class DemandasController {
 
       return response.created(solucao)
     } catch (error) {
-      return response.badRequest(error.message)
+      console.error('Error creating solution:', error); // Log para debug
+      return response.badRequest({
+        message: 'Erro ao criar solução',
+        error: error.message
+      })
     }
   }
 
@@ -87,14 +110,16 @@ export default class DemandasController {
     try {
       const solucao = await Solucao.findOrFail(params.id)
       const data = request.only([
-        'nome', 'sigla', 'descricao', 'versao', 'repositorio', 'tipo_id', 'linguagem_id', 'desenvolvedor_id', 'responsavel_id', 'status_id', 'categoria_id', 'data_status'
+        'nome', 'sigla', 'descricao', 'versao', 'repositorio', 
+        'link','tipo_id', 'linguagem_id', 'desenvolvedor_id', 
+        'responsavel_id', 'status_id', 'categoria_id', 'andamento',
+        'data_status', 'demanda_id'
       ])
       
       const mudancas = Object.entries(data)
         .filter(([key, value]) => solucao[key as keyof Solucao] !== value)
         .map(([key, value]) => `${key}: ${solucao[key as keyof Solucao]} -> ${value}`)
         .join(', ')
-
 
       if (mudancas) {
         await HistoricoSolucao.create({
