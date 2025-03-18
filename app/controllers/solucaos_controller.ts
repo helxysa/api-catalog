@@ -36,6 +36,7 @@ export default class DemandasController {
         'link',
         'andamento',
         'repositorio', 
+        'criticidade',
         'tipo_id', 
         'linguagem_id', 
         'desenvolvedor_id', 

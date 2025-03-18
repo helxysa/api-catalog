@@ -45,6 +45,9 @@ export default class Solucao extends BaseModel {
   declare andamento: string
 
   @column()
+  declare criticidade: string
+
+  @column()
   declare tipo_id: number
 
   @column()
