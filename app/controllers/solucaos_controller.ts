@@ -5,23 +5,35 @@ import HistoricoSolucao from '../models/historico_solucao.js'
 import Linguaguem from '../models/linguaguem.js'
 
 export default class DemandasController {
-  public async index({ response, request }: HttpContext) {
+  public async index({ request, response }: HttpContext) {
     try {
-      const page = request.input('page', 1)
-      const limit = request.input('limit', 6)
-      
-      const solucoes = await Solucao.query()
+      const page = request.input('page', 1);
+      const limit = request.input('limit', 6);
+      const demandaId = request.input('demanda_id');
+
+      const query = Solucao.query()
         .preload('demanda')
         .preload('tipo')
         .preload('desenvolvedor')
         .preload('responsavel')
         .preload('status')
-        .preload('categoria')
-        .paginate(page, limit)
-        
-      return response.ok(solucoes)
+        .preload('categoria');
+
+      if (demandaId) {
+        query.where('demanda_id', demandaId);
+      }
+
+      const solucoes = await query.paginate(page, limit);
+      
+      // Se houver demanda_id, retornamos apenas o array
+      if (demandaId) {
+        return response.ok(solucoes.all());
+      }
+      
+      // Caso contrário, retornamos o objeto de paginação completo
+      return response.ok(solucoes);
     } catch (error) {
-      return response.badRequest(error.message)
+      return response.badRequest(error.message);
     }
   }
 
@@ -240,6 +252,30 @@ export default class DemandasController {
         error: 'Erro ao buscar todas as soluções',
         details: error.message
       })
+    }
+  }
+
+  public async indexByDemanda({ request, response }: HttpContext) {
+    try {
+      const demandaId = request.input('demanda_id');
+      
+      if (!demandaId) {
+        return response.badRequest({ message: 'demanda_id é obrigatório' });
+      }
+
+      const solucoes = await Solucao.query()
+        .where('demanda_id', demandaId)
+        .preload('demanda')
+        .preload('tipo')
+        .preload('desenvolvedor')
+        .preload('responsavel')
+        .preload('status')
+        .preload('categoria')
+        .exec();
+
+      return response.ok(solucoes);
+    } catch (error) {
+      return response.badRequest(error.message);
     }
   }
 }

@@ -122,6 +122,8 @@ router.put('/solucoes/:id', [SolucoesController, 'update'])
 router.delete('/solucoes/:id', [SolucoesController, 'destroy'])
 router.get('/proprietarios/:proprietarioId/solucoes', [SolucoesController, 'indexByProprietario'])
 
+router.get('/solucoes/by-demanda', [SolucoesController, 'indexByDemanda'])
+
 router.get('/historico_demandas/:id', [HistoricoDemandasController, 'show'])
 router.get('/proprietarios/:proprietarioId/historico_demandas', [HistoricoDemandasController, 'indexByProprietario'])
 router.get('/historico_demandas', [HistoricoDemandasController, 'index'])
