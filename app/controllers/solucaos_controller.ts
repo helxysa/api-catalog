@@ -8,7 +8,7 @@ export default class DemandasController {
   public async index({ request, response }: HttpContext) {
     try {
       const page = request.input('page', 1);
-      const limit = request.input('limit', 6);
+      const limit = request.input('limit', 15);
       const demandaId = request.input('demanda_id');
 
       const query = Solucao.query()
