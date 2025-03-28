@@ -289,4 +289,30 @@ export default class SolucoesController {
       });
     }
   }
+
+  public async updateSolucoesSemProprietario({ request, response, auth }: HttpContext) {
+    try {
+      const proprietarioId = request.input('proprietario_id');
+      
+      if (!proprietarioId) {
+        return response.badRequest({ message: 'proprietario_id é obrigatório' });
+      }
+
+      // Busca e atualiza todas as soluções sem proprietário_id
+      const solucoes = await Solucao.query()
+        .whereNull('proprietario_id')
+        .update({ proprietario_id: proprietarioId });
+
+      return response.ok({
+        message: 'Soluções atualizadas com sucesso',
+        quantidade: solucoes
+      });
+    } catch (error) {
+      console.error('Erro ao atualizar soluções:', error);
+      return response.status(500).json({
+        error: 'Erro ao atualizar soluções',
+        details: error.message
+      });
+    }
+  }
 }

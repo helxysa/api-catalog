@@ -149,3 +149,5 @@ router.get('/tmp/upload/logo/:filename', async ({ params, response }) => {
     return response.notFound('Image not found')
   }
 })
+
+router.post('/solucoes/update-sem-proprietario', [SolucoesController, 'updateSolucoesSemProprietario']);
