@@ -180,57 +180,25 @@ export default class SolucoesController {
       if (!params.proprietarioId) {
         return response.status(400).json({
           message: 'ID do proprietário é obrigatório'
-        })
+        });
       }
 
-      // Primeiro, buscamos todas as soluções
       const solucoes = await Solucao.query()
         .where('proprietario_id', params.proprietarioId)
-        .preload('demanda', (query) => {
-          query.preload('proprietario')
-        })
+        .preload('demanda')
         .preload('tipo')
         .preload('desenvolvedor')
         .preload('responsavel')
         .preload('status')
-        .preload('categoria')
+        .preload('categoria');
 
-      // Agora vamos buscar todas as linguagens uma única vez
-      const todasLinguagens = await Linguaguem.query()
-        .where('proprietario_id', params.proprietarioId)
-
-      // Mapeamos as soluções para incluir as linguagens corretas
-      const solucoesComLinguagens = solucoes.map(solucao => {
-        // Convertemos a string de IDs em array de números
-        const linguagemIds = solucao.linguagem_id 
-          ? String(solucao.linguagem_id).split(',').map(id => Number(id.trim()))
-          : [];
-
-        // Filtramos as linguagens que correspondem aos IDs
-        const linguagens = todasLinguagens.filter(lang => 
-          linguagemIds.includes(lang.id)
-        );
-
-        // Retornamos a solução com as linguagens como um array
-        return {
-          ...solucao.toJSON(),
-          linguagens: linguagens, // Array de objetos de linguagem
-          linguagem_ids: linguagemIds // Array de IDs numéricos
-        }
-      })
-
-      return response.ok({
-        status: 'success',
-        data: solucoesComLinguagens
-      })
-
+      return response.ok(solucoes);
     } catch (error) {
-      console.error('Erro ao buscar soluções por proprietário:', error)
+      console.error('Erro ao buscar soluções por proprietário:', error);
       return response.status(500).json({
-        status: 'error',
         message: 'Erro ao buscar soluções por proprietário',
         error: error.message
-      })
+      });
     }
   }
 
@@ -291,18 +259,15 @@ export default class SolucoesController {
     try {
       const proprietarioId = params.proprietarioId;
       console.log('Buscando soluções para o proprietário:', proprietarioId);
-      
+
+      // Usando o ORM para buscar todas as soluções
       const solucoes = await Solucao.query()
         .where('proprietario_id', proprietarioId)
-        .preload('tipo')
-        .preload('desenvolvedor')
-        .preload('responsavel')
-        .preload('status')
-        .preload('categoria')
-        .preload('demanda')
-        
+        .debug(true) // Loga a query no console
+        .exec();
+
       console.log('Soluções encontradas:', solucoes.length);
-      
+
       // Verifica se encontrou soluções
       if (solucoes.length === 0) {
         return response.ok({
@@ -310,12 +275,12 @@ export default class SolucoesController {
           data: []
         });
       }
-      
+
       return response.ok({
         message: 'Soluções encontradas com sucesso',
         data: solucoes
       });
-      
+
     } catch (error) {
       console.error('Erro ao buscar soluções:', error);
       return response.status(500).json({
