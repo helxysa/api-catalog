@@ -137,6 +137,9 @@ router.get('/proprietarios/:proprietarioId/dashboard/demandas', [DemandasControl
 // Adicione esta nova rota antes do final do arquivo
 router.get('/proprietarios/:proprietarioId/relatorios/demandas', [DemandasController, 'getAllByProprietario'])
 
+// Add this new route with the others related to dashboard
+router.get('/proprietarios/:proprietarioId/dashboard/todas-solucoes', [SolucoesController, 'getAllSolucoesByProprietario'])
+
 // Serve logo images
 router.get('/tmp/upload/logo/:filename', async ({ params, response }) => {
   try {

@@ -4,7 +4,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import HistoricoSolucao from '../models/historico_solucao.js'
 import Linguaguem from '../models/linguaguem.js'
 
-export default class DemandasController {
+export default class SolucoesController {
   public async index({ request, response }: HttpContext) {
     try {
       const page = request.input('page', 1);
@@ -55,8 +55,8 @@ export default class DemandasController {
         'responsavel_id', 
         'status_id', 
         'categoria_id', 
-        'proprietario_id', 
-        'data_status'
+        'data_status',
+        'proprietario_id'
       ])
       
       // Log para debug
@@ -65,9 +65,17 @@ export default class DemandasController {
       if (!data.data_status) {
         data.data_status = new Date().toISOString().split('T')[0];
       }
+
+      // Garantir que o proprietario_id está presente
+      if (!data.proprietario_id) {
+        return response.badRequest({
+          message: 'proprietario_id é obrigatório',
+          error: 'Missing proprietario_id'
+        })
+      }
       
       const solucao = await Solucao.create(data)
-      console.log('Created solution:', solucao); // Log para debug
+      console.log('Created solution:', solucao);
 
       await HistoricoSolucao.create({
         solucao_id: solucao.id,
@@ -77,7 +85,7 @@ export default class DemandasController {
 
       return response.created(solucao)
     } catch (error) {
-      console.error('Error creating solution:', error); // Log para debug
+      console.error('Error creating solution:', error);
       return response.badRequest({
         message: 'Erro ao criar solução',
         error: error.message
@@ -276,6 +284,44 @@ export default class DemandasController {
       return response.ok(solucoes);
     } catch (error) {
       return response.badRequest(error.message);
+    }
+  }
+
+  public async getAllSolucoesByProprietario({ params, response }: HttpContext) {
+    try {
+      const proprietarioId = params.proprietarioId;
+      console.log('Buscando soluções para o proprietário:', proprietarioId);
+      
+      const solucoes = await Solucao.query()
+        .where('proprietario_id', proprietarioId)
+        .preload('tipo')
+        .preload('desenvolvedor')
+        .preload('responsavel')
+        .preload('status')
+        .preload('categoria')
+        .preload('demanda')
+        
+      console.log('Soluções encontradas:', solucoes.length);
+      
+      // Verifica se encontrou soluções
+      if (solucoes.length === 0) {
+        return response.ok({
+          message: 'Nenhuma solução encontrada para este proprietário',
+          data: []
+        });
+      }
+      
+      return response.ok({
+        message: 'Soluções encontradas com sucesso',
+        data: solucoes
+      });
+      
+    } catch (error) {
+      console.error('Erro ao buscar soluções:', error);
+      return response.status(500).json({
+        error: 'Erro ao buscar soluções',
+        details: error.message
+      });
     }
   }
 }
