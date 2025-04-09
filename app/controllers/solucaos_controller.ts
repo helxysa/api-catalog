@@ -1,4 +1,5 @@
 // hello-world/app/controllers/demandas_controller.ts
+/* eslint-disable */
 import Solucao from '../models/solucao.js'
 import type { HttpContext } from '@adonisjs/core/http'
 import HistoricoSolucao from '../models/historico_solucao.js'
@@ -132,9 +133,9 @@ export default class SolucoesController {
       const solucao = await Solucao.findOrFail(params.id)
       const data = request.only([
         'nome', 'sigla', 'descricao', 'versao', 'repositorio', 
-        'link','tipo_id', 'linguagem_id', 'desenvolvedor_id', 
+        'link', 'tipo_id', 'linguagem_id', 'desenvolvedor_id', 
         'responsavel_id', 'status_id', 'categoria_id', 'andamento',
-        'data_status', 'demanda_id'
+        'data_status', 'demanda_id', 'criticidade'  // Adicionado 'criticidade' aqui
       ])
       
       const mudancas = Object.entries(data)
@@ -152,9 +153,13 @@ export default class SolucoesController {
 
       solucao.merge(data)
       await solucao.save()
+
       return response.ok(solucao)
     } catch (error) {
-      return response.badRequest(error.message)
+      return response.badRequest({
+        message: 'Erro ao atualizar solução',
+        error: error.message
+      })
     }
   }
 
