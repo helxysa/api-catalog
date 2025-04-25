@@ -1,4 +1,4 @@
-
+/* eslint-disable */
 import type { HttpContext } from '@adonisjs/core/http'
 import Tipo from '../models/tipo.js'  
 

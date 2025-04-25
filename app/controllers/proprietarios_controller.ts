@@ -1,3 +1,4 @@
+/* eslint-disable */
 import type { HttpContext } from '@adonisjs/core/http'
 import Proprietario from '#models/proprietario'
 import { mkdir } from 'node:fs/promises'

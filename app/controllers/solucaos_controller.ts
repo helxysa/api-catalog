@@ -25,12 +25,12 @@ export default class SolucoesController {
       }
 
       const solucoes = await query.paginate(page, limit);
-      
+
       // Se houver demanda_id, retornamos apenas o array
       if (demandaId) {
         return response.ok(solucoes.all());
       }
-      
+
       // Caso contrário, retornamos o objeto de paginação completo
       return response.ok(solucoes);
     } catch (error) {
@@ -41,28 +41,27 @@ export default class SolucoesController {
   public async store({ request, response, auth }: HttpContext) {
     try {
       const data = request.only([
-        'demanda_id', 
-        'nome', 
-        'sigla', 
-        'descricao', 
-        'versao', 
+        'demanda_id',
+        'nome',
+        'sigla',
+        'descricao',
+        'versao',
         'link',
         'andamento',
-        'repositorio', 
+        'repositorio',
         'criticidade',
-        'tipo_id', 
-        'linguagem_id', 
-        'desenvolvedor_id', 
-        'responsavel_id', 
-        'status_id', 
-        'categoria_id', 
+        'tipo_id',
+        'linguagem_id',
+        'desenvolvedor_id',
+        'responsavel_id',
+        'status_id',
+        'categoria_id',
         'data_status',
         'proprietario_id'
       ])
-      
+
       // Log para debug
-      console.log('Received data:', data);
-      
+
       if (!data.data_status) {
         data.data_status = new Date().toISOString().split('T')[0];
       }
@@ -74,9 +73,8 @@ export default class SolucoesController {
           error: 'Missing proprietario_id'
         })
       }
-      
+
       const solucao = await Solucao.create(data)
-      console.log('Created solution:', solucao);
 
       await HistoricoSolucao.create({
         solucao_id: solucao.id,
@@ -107,7 +105,7 @@ export default class SolucoesController {
         .firstOrFail()
 
       // Buscamos as linguagens
-      const linguagemIds = solucao.linguagem_id 
+      const linguagemIds = solucao.linguagem_id
         ? String(solucao.linguagem_id).split(',').map(id => Number(id.trim()))
         : [];
 
@@ -132,12 +130,12 @@ export default class SolucoesController {
     try {
       const solucao = await Solucao.findOrFail(params.id)
       const data = request.only([
-        'nome', 'sigla', 'descricao', 'versao', 'repositorio', 
-        'link', 'tipo_id', 'linguagem_id', 'desenvolvedor_id', 
+        'nome', 'sigla', 'descricao', 'versao', 'repositorio',
+        'link', 'tipo_id', 'linguagem_id', 'desenvolvedor_id',
         'responsavel_id', 'status_id', 'categoria_id', 'andamento',
         'data_status', 'demanda_id', 'criticidade'  // Adicionado 'criticidade' aqui
       ])
-      
+
       const mudancas = Object.entries(data)
         .filter(([key, value]) => solucao[key as keyof Solucao] !== value)
         .map(([key, value]) => `${key}: ${solucao[key as keyof Solucao]} -> ${value}`)
@@ -146,7 +144,7 @@ export default class SolucoesController {
       if (mudancas) {
         await HistoricoSolucao.create({
           solucao_id: solucao.id,
-          usuario: auth.user?.email ?? 'sistema', 
+          usuario: auth.user?.email ?? 'sistema',
           descricao: `Alterações: ${mudancas}`
         })
       }
@@ -211,7 +209,7 @@ export default class SolucoesController {
   public async getAllByProprietario({ params, response }: HttpContext) {
     try {
       const proprietarioId = params.proprietarioId;
-      
+
       // Busca todas as soluções relacionadas às demandas do proprietário
       const solucoes = await Solucao.query()
         .whereIn('demanda_id', (query) => {
@@ -225,7 +223,7 @@ export default class SolucoesController {
         .preload('responsavel')
         .preload('status')
         .preload('categoria')
-        
+
       return response.ok(solucoes)
     } catch (error) {
       console.error('Erro ao buscar todas as soluções:', error)
@@ -239,7 +237,7 @@ export default class SolucoesController {
   public async indexByDemanda({ request, response }: HttpContext) {
     try {
       const demandaId = request.input('demanda_id');
-      
+
       if (!demandaId) {
         return response.badRequest({ message: 'demanda_id é obrigatório' });
       }
@@ -263,15 +261,19 @@ export default class SolucoesController {
   public async getAllSolucoesByProprietario({ params, response }: HttpContext) {
     try {
       const proprietarioId = params.proprietarioId;
-      console.log('Buscando soluções para o proprietário:', proprietarioId);
 
-      // Usando o ORM para buscar todas as soluções
+      // Usando o ORM para buscar todas as soluções com seus relacionamentos
       const solucoes = await Solucao.query()
         .where('proprietario_id', proprietarioId)
+        .preload('demanda')
+        .preload('tipo')
+        .preload('desenvolvedor')
+        .preload('responsavel')
+        .preload('status')
+        .preload('categoria')
         .debug(true) // Loga a query no console
         .exec();
 
-      console.log('Soluções encontradas:', solucoes.length);
 
       // Verifica se encontrou soluções
       if (solucoes.length === 0) {
@@ -298,7 +300,7 @@ export default class SolucoesController {
   public async updateSolucoesSemProprietario({ request, response, auth }: HttpContext) {
     try {
       const proprietarioId = request.input('proprietario_id');
-      
+
       if (!proprietarioId) {
         return response.badRequest({ message: 'proprietario_id é obrigatório' });
       }

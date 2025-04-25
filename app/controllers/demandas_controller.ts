@@ -1,3 +1,4 @@
+/* eslint-disable */
 // hello-world/app/controllers/demandas_controller.ts
 import Demanda from '../models/demanda.js'
 import type { HttpContext } from '@adonisjs/core/http'

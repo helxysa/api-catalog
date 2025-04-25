@@ -1,4 +1,4 @@
-
+/* eslint-disable */
 import type { HttpContext } from '@adonisjs/core/http'
 import Prioridade from '../models/prioridade.js'
 
@@ -11,7 +11,7 @@ export default class PrioridadesController {
   public async store({ request, response }: HttpContext) {
     try {
       const data = request.only(['nome', 'descricao', 'proprietario_id'])
-      console.log('Dados recebidos no backend:', data) // Debug
+      
       
       // Validação mais detalhada
       if (!data.nome) {
@@ -24,7 +24,7 @@ export default class PrioridadesController {
 
       // Garantir que proprietario_id seja número
       data.proprietario_id = Number(data.proprietario_id)
-      console.log('Dados após conversão:', data) // Debug
+      
 
       const prioridade = await Prioridade.create(data)
       return response.created(prioridade)

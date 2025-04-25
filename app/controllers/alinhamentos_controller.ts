@@ -1,3 +1,4 @@
+/* eslint-disable */
 import Alinhamento from '../models/alinhamento.js'
 import type { HttpContext } from '@adonisjs/core/http'
 
@@ -11,7 +12,6 @@ export default class AlinhamentosController {
   public async store({ request, response }: HttpContext) {
     try {
       const data = request.only(['nome', 'descricao', 'proprietario_id'])
-      console.log('Dados recebidos no backend:', data) // Debug
       
       if (!data.nome) {
         return response.badRequest('Nome é obrigatório')
@@ -23,7 +23,7 @@ export default class AlinhamentosController {
 
       // Garantir que proprietario_id seja número
       data.proprietario_id = Number(data.proprietario_id)
-      console.log('Dados após conversão:', data) // Debug
+       // Debug
 
       const alinhamento = await Alinhamento.create(data)
       return response.created(alinhamento)

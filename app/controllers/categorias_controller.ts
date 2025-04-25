@@ -1,5 +1,7 @@
+/* eslint-disable */
 import type { HttpContext } from '@adonisjs/core/http'
 import Categoria from '../models/categoria.js'
+
 
 export default class CategoriasController {
   public async index({ response }: HttpContext) {
@@ -10,21 +12,16 @@ export default class CategoriasController {
   public async store({ request, response }: HttpContext) {
     try {
       const data = request.only(['nome', 'descricao', 'proprietario_id'])
-      console.log('Dados recebidos no backend:', data) // Debug
-      
       // Validação mais detalhada
       if (!data.nome) {
         return response.badRequest('Nome é obrigatório')
       }
-      
       if (!data.proprietario_id) {
         return response.badRequest('proprietario_id é obrigatório')
       }
 
       // Garantir que proprietario_id seja número
       data.proprietario_id = Number(data.proprietario_id)
-      console.log('Dados após conversão:', data) // Debug
-
       const categoria = await Categoria.create(data)
       return response.created(categoria)
     } catch (error) {

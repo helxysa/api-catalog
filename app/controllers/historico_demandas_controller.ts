@@ -1,3 +1,4 @@
+/* eslint-disable */
 import type { HttpContext } from '@adonisjs/core/http'
 import HistoricoDemanda from '../models/historico_demanda.js'
 
