@@ -6,11 +6,12 @@
 | The routes file is used for defining the HTTP routes.
 |
 */
-
+/*eslint-disable */
 import router from '@adonisjs/core/services/router'
 import { createReadStream } from 'node:fs'
 import { join } from 'node:path'
 import { cwd } from 'node:process'
+import { middleware } from '#start/kernel'
 
 import AlinhamentosController from '../app/controllers/alinhamentos_controller.js'
 import CategoriasController from '../app/controllers/categorias_controller.js'
@@ -26,6 +27,7 @@ import HistoricoDemandasController from '../app/controllers/historico_demandas_c
 import SolucoesController from '../app/controllers/solucaos_controller.js'
 import HistoricoSolucoesController from '../app/controllers/historico_solucaos_controller.js'
 import TimesController from '#controllers/times_controller'
+import AuthController from '../app/controllers/auth_controller.js'
 
 router.get('/', async () => {
   return {
@@ -33,14 +35,23 @@ router.get('/', async () => {
   }
 })
 
-router.get('/alinhamentos', [AlinhamentosController, 'index'])
-router.post('/alinhamentos', [AlinhamentosController, 'store'])
-router.get('/alinhamentos/:id', [AlinhamentosController, 'show'])
-router.put('/alinhamentos/:id', [AlinhamentosController, 'update'])
-router.delete('/alinhamentos/:id', [AlinhamentosController, 'destroy'])
-router.get('/proprietarios/:proprietarioId/alinhamentos', [AlinhamentosController, 'indexByProprietario'])
+// Rotas de autenticação
+router.post('/auth/login', [AuthController, 'login'])
+router.post('/auth/register', [AuthController, 'register'])
+router.post('/auth/logout', [AuthController, 'logout']).use(middleware.auth())
+router.get('/auth/me', [AuthController, 'me'])
 
-router.get('/desenvolvedores', [DesenvolvedoresController, 'index'])
+// Rotas protegidas por autenticação
+router.group(
+  () => {
+    router.get('/alinhamentos', [AlinhamentosController, 'index'])
+    router.post('/alinhamentos', [AlinhamentosController, 'store'])
+    router.get('/alinhamentos/:id', [AlinhamentosController, 'show'])
+    router.put('/alinhamentos/:id', [AlinhamentosController, 'update'])
+    router.delete('/alinhamentos/:id', [AlinhamentosController, 'destroy'])
+    router.get('/proprietarios/:proprietarioId/alinhamentos', [AlinhamentosController, 'indexByProprietario'])
+
+    router.get('/desenvolvedores', [DesenvolvedoresController, 'index'])
 router.post('/desenvolvedores', [DesenvolvedoresController, 'store'])
 router.get('/desenvolvedores/:id', [DesenvolvedoresController, 'show'])
 router.put('/desenvolvedores/:id', [DesenvolvedoresController, 'update'])
@@ -90,7 +101,7 @@ router.post('/responsaveis', [ResponsaveisController, 'store'])
 router.get('/responsaveis/:id', [ResponsaveisController, 'show'])
 router.put('/responsaveis/:id', [ResponsaveisController, 'update'])
 router.delete('/responsaveis/:id', [ResponsaveisController, 'destroy'])
-router.get('/proprietarios/:proprietarioId/responsaveis', [ResponsaveisController, 'indexByProprietario'])  
+router.get('/proprietarios/:proprietarioId/responsaveis', [ResponsaveisController, 'indexByProprietario'])
 
 router.get('/prioridades', [PrioridadesController, 'index'])
 router.post('/prioridades', [PrioridadesController, 'store'])
@@ -130,15 +141,14 @@ router.get('/historico_demandas', [HistoricoDemandasController, 'index'])
 router.get('/historico_solucoes/:id', [HistoricoSolucoesController, 'show'])
 router.get('/historico_solucoes', [HistoricoSolucoesController, 'index'])
 
-// rotas sem paginação para o dashboard
+
 router.get('/proprietarios/:proprietarioId/dashboard/solucoes', [SolucoesController, 'getAllByProprietario'])
 router.get('/proprietarios/:proprietarioId/dashboard/demandas', [DemandasController, 'getAllByProprietario'])
-
-// Adicione esta nova rota antes do final do arquivo
 router.get('/proprietarios/:proprietarioId/relatorios/demandas', [DemandasController, 'getAllByProprietario'])
-
-// Add this new route with the others related to dashboard
 router.get('/proprietarios/:proprietarioId/dashboard/todas-solucoes', [SolucoesController, 'getAllSolucoesByProprietario'])
+
+  }
+).use(middleware.auth())
 
 // Serve logo images
 router.get('/tmp/upload/logo/:filename', async ({ params, response }) => {
@@ -150,4 +160,4 @@ router.get('/tmp/upload/logo/:filename', async ({ params, response }) => {
   }
 })
 
-router.post('/solucoes/update-sem-proprietario', [SolucoesController, 'updateSolucoesSemProprietario']);
+// router.post('/solucoes/update-sem-proprietario', [SolucoesController, 'updateSolucoesSemProprietario']);
