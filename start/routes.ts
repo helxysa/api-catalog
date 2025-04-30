@@ -37,7 +37,6 @@ router.get('/', async () => {
 
 // Rotas de autenticação
 router.post('/auth/login', [AuthController, 'login'])
-router.post('/auth/register', [AuthController, 'register'])
 router.post('/auth/logout', [AuthController, 'logout']).use(middleware.auth())
 router.get('/auth/me', [AuthController, 'me'])
 
@@ -50,7 +49,7 @@ router.group(
     router.put('/alinhamentos/:id', [AlinhamentosController, 'update'])
     router.delete('/alinhamentos/:id', [AlinhamentosController, 'destroy'])
     router.get('/proprietarios/:proprietarioId/alinhamentos', [AlinhamentosController, 'indexByProprietario'])
-
+    router.post('/auth/register', [AuthController, 'register'])
     router.get('/desenvolvedores', [DesenvolvedoresController, 'index'])
 router.post('/desenvolvedores', [DesenvolvedoresController, 'store'])
 router.get('/desenvolvedores/:id', [DesenvolvedoresController, 'show'])
