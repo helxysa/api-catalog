@@ -3,17 +3,16 @@ import type { HttpContext } from '@adonisjs/core/http'
 import User from '../models/user.js'
 import hash from '@adonisjs/core/services/hash'
 
+
 export default class AuthController {
   /**
    * Método para login de usuário
    */
   public async login({ request, response, auth }: HttpContext) {
     try {
-      // Obter credenciais do request
       const { email, password } = request.only(['email', 'password'])
 
 
-      // Verificar se o usuário existe
       const user = await User.findBy('email', email)
       if (!user) {
         return response.unauthorized({
@@ -22,11 +21,7 @@ export default class AuthController {
         })
       }
 
-      // Tentar autenticar o usuário
       try {
-        // Verificar a senha manualmente
-       
-
         try {
           const isPasswordValid = await hash.verify(user.password, password)
 
@@ -46,8 +41,6 @@ export default class AuthController {
 
         // Fazer login com o usuário
         await auth.use('web').login(user)
-
-        // Se a autenticação for bem-sucedida, retornar sucesso
         return response.ok({
           message: 'Login realizado com sucesso',
           user: auth.user
@@ -74,7 +67,6 @@ export default class AuthController {
    */
   public async register({ request, response, auth }: HttpContext) {
     try {
-      // Verificar se o usuário está autenticado
       if (!await auth.check()) {
         return response.unauthorized({ message: 'Não autenticado' })
       }
@@ -87,10 +79,8 @@ export default class AuthController {
         })
       }
 
-      // Obter dados do request
       const userData = request.only(['fullName', 'email', 'password'])
 
-      // Verificar se o usuário já existe
       const existingUser = await User.findBy('email', userData.email)
       if (existingUser) {
         return response.conflict({ message: 'Este email já está em uso' })

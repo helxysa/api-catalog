@@ -4,7 +4,6 @@ import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import Proprietario from './proprietario.js'
 
 export default class Responsavel extends BaseModel {
-
   public static table = 'responsaveis'
 
   @column({ isPrimary: true })

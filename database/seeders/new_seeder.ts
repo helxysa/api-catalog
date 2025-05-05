@@ -5,8 +5,9 @@ export default class UserSeeder extends BaseSeeder {
   async run() {
     await User.create({
       fullName: 'Admin User',
-      email: 'catalog@mpap.mp.br',
+      email: 'admin@admin.mp.br',
       password: 'catalog@2025',
+      roleId: 2,
     })
   }
 }
