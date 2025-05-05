@@ -43,13 +43,19 @@ router.get('/auth/me', [AuthController, 'me'])
 // Rotas protegidas por autenticação
 router.group(
   () => {
+    // Add the list-users route inside the authenticated group
+    router.get('/auth/list-users', [AuthController, 'listUsers'])
+    router.post('/auth/register', [AuthController, 'register'])
+    
+    // Nova rota para listar todos os usuários (apenas para admin)
+    router.get('/users', [AuthController, 'listUsers'])
+    
     router.get('/alinhamentos', [AlinhamentosController, 'index'])
     router.post('/alinhamentos', [AlinhamentosController, 'store'])
     router.get('/alinhamentos/:id', [AlinhamentosController, 'show'])
     router.put('/alinhamentos/:id', [AlinhamentosController, 'update'])
     router.delete('/alinhamentos/:id', [AlinhamentosController, 'destroy'])
     router.get('/proprietarios/:proprietarioId/alinhamentos', [AlinhamentosController, 'indexByProprietario'])
-    router.post('/auth/register', [AuthController, 'register'])
     router.get('/desenvolvedores', [DesenvolvedoresController, 'index'])
 
   router.post('/desenvolvedores', [DesenvolvedoresController, 'store'])
@@ -146,6 +152,7 @@ router.group(
   router.get('/proprietarios/:proprietarioId/dashboard/demandas', [DemandasController, 'getAllByProprietario'])
   router.get('/proprietarios/:proprietarioId/relatorios/demandas', [DemandasController, 'getAllByProprietario'])
   router.get('/proprietarios/:proprietarioId/dashboard/todas-solucoes', [SolucoesController, 'getAllSolucoesByProprietario'])
+  router.get('/users/:userId/proprietarios', [ProprietariosController, 'getByUserId'])
 
   }
 ).use(middleware.auth())
@@ -160,4 +167,4 @@ router.get('/tmp/upload/logo/:filename', async ({ params, response }) => {
   }
 })
 
-// router.post('/solucoes/update-sem-proprietario', [SolucoesController, 'updateSolucoesSemProprietario']);
+

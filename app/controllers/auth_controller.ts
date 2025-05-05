@@ -70,9 +70,23 @@ export default class AuthController {
 
   /**
    * Método para registro de usuário
+   * Disponível apenas para usuários admin (ID 1)
    */
   public async register({ request, response, auth }: HttpContext) {
     try {
+      // Verificar se o usuário está autenticado
+      if (!await auth.check()) {
+        return response.unauthorized({ message: 'Não autenticado' })
+      }
+
+  
+      if (auth.user?.id !== 1) {
+        return response.forbidden({ 
+          message: 'Acesso negado', 
+          error: 'Apenas administradores podem registrar novos usuários' 
+        })
+      }
+
       // Obter dados do request
       const userData = request.only(['fullName', 'email', 'password'])
 
@@ -89,16 +103,56 @@ export default class AuthController {
         password: userData.password // O hash será feito automaticamente pelo hook do modelo
       })
 
-      // Autenticar o usuário após o registro
-      await auth.use('web').login(user)
-
       return response.created({
         message: 'Usuário registrado com sucesso',
-        user: auth.user
+        user: {
+          id: user.id,
+          fullName: user.fullName,
+          email: user.email
+        }
       })
     } catch (error) {
       return response.badRequest({
         message: 'Erro ao registrar usuário',
+        error: error.message
+      })
+    }
+  }
+
+  /**
+   * Método para listar todos os usuários
+   * Disponível apenas para usuários admin (ID 1)
+   */
+  public async listUsers({ response, auth }: HttpContext) {
+    try {
+      // Verificar se o usuário está autenticado
+      if (!await auth.check()) {
+        return response.unauthorized({ message: 'Não autenticado' })
+      }
+
+      // Verificar se o usuário autenticado é admin (ID 1)
+      if (auth.user?.id !== 1) {
+        return response.forbidden({ 
+          message: 'Acesso negado', 
+          error: 'Apenas administradores podem listar usuários' 
+        })
+      }
+
+      // Buscar todos os usuários
+      const users = await User.all()
+      
+      // Retornar a lista de usuários sem as senhas
+      const safeUsers = users.map(user => ({
+        id: user.id,
+        fullName: user.fullName,
+        email: user.email,
+        createdAt: user.createdAt
+      }))
+
+      return response.ok(safeUsers)
+    } catch (error) {
+      return response.badRequest({
+        message: 'Erro ao listar usuários',
         error: error.message
       })
     }
@@ -122,3 +176,6 @@ export default class AuthController {
     return response.unauthorized({ message: 'Não autenticado' })
   }
 }
+
+
+

@@ -1,6 +1,7 @@
 /* eslint-disable */
 import type { HttpContext } from '@adonisjs/core/http'
 import Proprietario from '#models/proprietario'
+import User from '#models/user'
 import { mkdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import { cwd } from 'node:process'
@@ -20,12 +21,41 @@ export default class ResponsaveisController {
   }
 
   public async index({ response }: HttpContext) {
-    const proprietarios = await Proprietario.all()
-    const proprietariosWithUrls = proprietarios.map(proprietario => ({
-      ...proprietario.toJSON(),
-      logo: this.getLogoUrl(proprietario.logo)
-    }))
-    return response.ok(proprietariosWithUrls)
+    try {
+      // Buscar proprietários sem usar preload
+      const proprietarios = await Proprietario.all()
+      
+      // Buscar todos os usuários de uma vez (mais eficiente)
+      const userIds = proprietarios.map(p => p.user_id).filter(id => id !== null)
+      const users = await User.query().whereIn('id', userIds)
+      
+      // Criar um mapa de usuários por ID para fácil acesso
+      const userMap: { [key: number]: User } = {}
+      users.forEach(user => {
+        userMap[user.id] = user
+      })
+      
+      // Montar o resultado com as URLs de logo e informações de usuário
+      const proprietariosWithUrls = proprietarios.map(proprietario => {
+        const proprietarioJson = proprietario.toJSON()
+        const userId = proprietario.user_id
+        
+        return {
+          ...proprietarioJson,
+          logo: this.getLogoUrl(proprietario.logo),
+          user: userId ? {
+            id: userId,
+            email: userMap[userId]?.email || '',
+            fullName: userMap[userId]?.fullName || ''
+          } : null
+        }
+      })
+      
+      return response.ok(proprietariosWithUrls)
+    } catch (error) {
+      console.error('Erro ao buscar proprietários:', error)
+      return response.internalServerError({ error: 'Erro ao buscar proprietários' })
+    }
   }
 
   public async store({ request, response }: HttpContext) {
@@ -48,16 +78,18 @@ export default class ResponsaveisController {
       }
 
       // Get other form data with proper typing
-      const formData = request.only(['nome', 'sigla', 'descricao']) as {
+      const formData = request.only(['nome', 'sigla', 'descricao', 'user_id']) as {
         nome: string
         sigla: string
         descricao?: string
+        user_id?: number
       }
       
       // Create the full data object with logo
-      const data: Partial<Pick<Proprietario, 'nome' | 'sigla' | 'descricao' | 'logo'>> = {
+      const data: Partial<Pick<Proprietario, 'nome' | 'sigla' | 'descricao' | 'logo' | 'user_id'>> = {
         ...formData,
-        logo: logoFileName // undefined if no logo was uploaded
+        logo: logoFileName, // undefined if no logo was uploaded
+        user_id: formData.user_id ? Number(formData.user_id) : null
       }
 
       const proprietario = await Proprietario.create(data)
@@ -104,15 +136,17 @@ export default class ResponsaveisController {
       }
 
       // Get other form data and create update object
-      const formData = request.only(['nome', 'sigla', 'descricao']) as {
+      const formData = request.only(['nome', 'sigla', 'descricao', 'user_id']) as {
         nome: string
         sigla: string
         descricao?: string
+        user_id?: number
       }
 
-      const data: Partial<Pick<Proprietario, 'nome' | 'sigla' | 'descricao' | 'logo'>> = {
+      const data: Partial<Pick<Proprietario, 'nome' | 'sigla' | 'descricao' | 'logo' | 'user_id'>> = {
         ...formData,
-        logo: logoFileName
+        logo: logoFileName,
+        user_id: formData.user_id ? Number(formData.user_id) : proprietario.user_id
       }
 
       proprietario.merge(data)
@@ -169,7 +203,8 @@ export default class ResponsaveisController {
         nome: newNome,
         sigla: newSigla,
         descricao: originalProprietario.descricao,
-        logo: newLogoFileName
+        logo: newLogoFileName,
+        user_id: originalProprietario.user_id // Adicionando user_id ao clone
       })
 
       return response.created({
@@ -178,6 +213,24 @@ export default class ResponsaveisController {
       })
     } catch (error) {
       return response.badRequest(error.message)
+    }
+  }
+
+  // Adicionar método para buscar proprietários por usuário
+  public async getByUserId({ params, response }: HttpContext) {
+    try {
+      const userId = params.userId
+      
+      // Buscar proprietários associados ao usuário específico
+      const proprietarios = await Proprietario.query()
+        .where('user_id', userId)
+      
+      return response.ok(proprietarios)
+    } catch (error) {
+      return response.badRequest({
+        message: 'Erro ao buscar proprietários do usuário',
+        error: error.message
+      })
     }
   }
 }
