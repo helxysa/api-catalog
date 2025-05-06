@@ -24,22 +24,22 @@ export default class ResponsaveisController {
     try {
       // Buscar proprietários sem usar preload
       const proprietarios = await Proprietario.all()
-      
+
       // Buscar todos os usuários de uma vez (mais eficiente)
       const userIds = proprietarios.map(p => p.user_id).filter(id => id !== null)
       const users = await User.query().whereIn('id', userIds)
-      
+
       // Criar um mapa de usuários por ID para fácil acesso
       const userMap: { [key: number]: User } = {}
       users.forEach(user => {
         userMap[user.id] = user
       })
-      
+
       // Montar o resultado com as URLs de logo e informações de usuário
       const proprietariosWithUrls = proprietarios.map(proprietario => {
         const proprietarioJson = proprietario.toJSON()
         const userId = proprietario.user_id
-        
+
         return {
           ...proprietarioJson,
           logo: this.getLogoUrl(proprietario.logo),
@@ -50,7 +50,7 @@ export default class ResponsaveisController {
           } : null
         }
       })
-      
+
       return response.ok(proprietariosWithUrls)
     } catch (error) {
       console.error('Erro ao buscar proprietários:', error)
@@ -67,10 +67,10 @@ export default class ResponsaveisController {
       if (logo) {
         // Ensure upload directory exists
         const uploadDir = await this.ensureUploadDirectory()
-        
+
         // Generate unique filename using timestamp
         logoFileName = `${Date.now()}-${logo.clientName}`
-        
+
         // Move the uploaded file to our upload directory
         await logo.move(uploadDir, {
           name: logoFileName,
@@ -84,7 +84,7 @@ export default class ResponsaveisController {
         descricao?: string
         user_id?: number
       }
-      
+
       // Create the full data object with logo
       const data: Partial<Pick<Proprietario, 'nome' | 'sigla' | 'descricao' | 'logo' | 'user_id'>> = {
         ...formData,
@@ -117,7 +117,7 @@ export default class ResponsaveisController {
   public async update({ params, request, response }: HttpContext) {
     try {
       const proprietario = await Proprietario.findOrFail(params.id)
-      
+
       // Handle logo file update if provided
       const logo = request.file('logo')
       let logoFileName: string | undefined = proprietario.logo // Keep existing logo if no new file
@@ -125,10 +125,10 @@ export default class ResponsaveisController {
       if (logo) {
         // Ensure upload directory exists
         const uploadDir = await this.ensureUploadDirectory()
-        
+
         // Generate unique filename using timestamp
         logoFileName = `${Date.now()}-${logo.clientName}`
-        
+
         // Move the uploaded file to our upload directory
         await logo.move(uploadDir, {
           name: logoFileName,
@@ -151,7 +151,7 @@ export default class ResponsaveisController {
 
       proprietario.merge(data)
       await proprietario.save()
-      
+
       return response.ok({
         ...proprietario.toJSON(),
         logo: this.getLogoUrl(proprietario.logo)
@@ -175,7 +175,7 @@ export default class ResponsaveisController {
     try {
       // Encontrar o proprietário original
       const originalProprietario = await Proprietario.findOrFail(params.id)
-      
+
       // Criar novo nome e sigla para o clone
       const newNome = `${originalProprietario.nome} (Cópia)`
       const newSigla = `${originalProprietario.sigla}_COPY`
@@ -185,7 +185,7 @@ export default class ResponsaveisController {
       if (originalProprietario.logo) {
         const uploadDir = await this.ensureUploadDirectory()
         newLogoFileName = `copy-${Date.now()}-${originalProprietario.logo}`
-        
+
         // Copiar o arquivo de logo
         try {
           await copyFile(
@@ -220,12 +220,20 @@ export default class ResponsaveisController {
   public async getByUserId({ params, response }: HttpContext) {
     try {
       const userId = params.userId
-      
+
       // Buscar proprietários associados ao usuário específico
       const proprietarios = await Proprietario.query()
         .where('user_id', userId)
-      
-      return response.ok(proprietarios)
+
+      // Adicionar URLs de logo aos proprietários
+      const proprietariosWithUrls = proprietarios.map(proprietario => {
+        return {
+          ...proprietario.toJSON(),
+          logo: this.getLogoUrl(proprietario.logo)
+        }
+      })
+
+      return response.ok(proprietariosWithUrls)
     } catch (error) {
       return response.badRequest({
         message: 'Erro ao buscar proprietários do usuário',
