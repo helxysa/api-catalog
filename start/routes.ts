@@ -30,30 +30,31 @@ import TimesController from '#controllers/times_controller'
 import AuthController from '../app/controllers/auth_controller.js'
 import PerfisController from '../app/controllers/roles_controller.js'
 
-router.get('/', async () => {
-  return {
-    hello: 'ministério publico',
-  }
-})
 
 // Rotas de autenticação
 router.post('/auth/login', [AuthController, 'login'])
 router.post('/auth/logout', [AuthController, 'logout']).use(middleware.auth())
 router.get('/auth/me', [AuthController, 'me'])
 
-// Rotas que exigem permissões de administrador
+// Rotas que exigem permissões de administrador ou gerente
 router.group(() => {
+  // Rotas de visualização (acessíveis por admin e manager)
   router.get('/auth/list-users', [AuthController, 'listUsers'])
-  router.post('/auth/register', [AuthController, 'register'])
-  router.put('/auth/update-user', [AuthController, 'updateUser'])
-  router.delete('/auth/delete-user/:id', [AuthController, 'deleteUser'])
   router.get('/users', [AuthController, 'listUsers'])
-  
   router.get('/perfils', [PerfisController, 'index'])
-  router.post('/perfils', [PerfisController, 'store'])
   router.get('/perfils/:id', [PerfisController, 'show'])
-  router.put('/perfils/:id', [PerfisController, 'update'])
-  router.delete('/perfils/:id', [PerfisController, 'destroy'])
+  
+  // Rotas de modificação (apenas admin)
+  router.group(() => {
+    router.post('/auth/register', [AuthController, 'register'])
+    router.put('/auth/update-user', [AuthController, 'updateUser'])
+    router.delete('/auth/delete-user/:id', [AuthController, 'deleteUser'])
+    
+    router.post('/perfils', [PerfisController, 'store'])
+    router.put('/perfils/:id', [PerfisController, 'update'])
+    router.delete('/perfils/:id', [PerfisController, 'destroy'])
+  }).use(middleware.adminOnly())
+  
 }).use(middleware.admin())
 
 // Outras rotas protegidas por autenticação
@@ -86,16 +87,12 @@ router.group(() => {
   router.delete('/linguagens/:id', [LinguagensController, 'destroy'])
   router.get('/proprietarios/:proprietarioId/linguagens', [LinguagensController, 'indexByProprietario'])
 
-
-
   router.get('/times', [TimesController, 'index'])
   router.post('/times', [TimesController, 'store'])
   router.get('/times/:id', [TimesController, 'show'])
   router.put('/times/:id', [TimesController, 'update'])
   router.delete('/times/:id', [TimesController, 'destroy'])
   router.get('/proprietarios/:proprietarioId/times', [TimesController, 'indexByProprietario'])
-
-
 
   router.get('/tipos', [TiposController, 'index'])
   router.post('/tipos', [TiposController, 'store'])

@@ -12,7 +12,6 @@ export default class AuthController {
     try {
       const { email, password } = request.only(['email', 'password'])
 
-
       const user = await User.findBy('email', email)
       if (!user) {
         return response.unauthorized({
@@ -39,7 +38,6 @@ export default class AuthController {
           })
         }
 
-        // Fazer login com o usuário
         await auth.use('web').login(user)
         return response.ok({
           message: 'Login realizado com sucesso',
@@ -53,7 +51,6 @@ export default class AuthController {
       }
     } catch (error) {
       console.error('Erro no processo de login:', error)
-      // Se a autenticação falhar, retornar erro
       return response.unauthorized({
         message: 'Credenciais inválidas',
         error: error.message
@@ -89,8 +86,8 @@ export default class AuthController {
       const user = await User.create({
         fullName: userData.fullName,
         email: userData.email,
-        password: userData.password, // O hash será feito automaticamente pelo hook do modelo
-        roleId: userData.roleId || Roles.USER // Usar o roleId fornecido ou o padrão USER
+        password: userData.password, 
+        roleId: userData.roleId || Roles.USER 
       })
 
       return response.created({
@@ -116,12 +113,10 @@ export default class AuthController {
    */
   public async listUsers({ response, auth }: HttpContext) {
     try {
-      // Verificar se o usuário está autenticado
       if (!await auth.check()) {
         return response.unauthorized({ message: 'Não autenticado' })
       }
 
-      // Verificar se o usuário autenticado é admin (roleId 2)
       if (auth.user?.roleId !== Roles.ADMIN) {
         return response.forbidden({ 
           message: 'Acesso negado', 
@@ -129,15 +124,13 @@ export default class AuthController {
         })
       }
 
-      // Buscar todos os usuários
       const users = await User.all()
       
-      // Retornar a lista de usuários sem as senhas
       const safeUsers = users.map(user => ({
         id: user.id,
         fullName: user.fullName,
         email: user.email,
-        roleId: user.roleId, // Adicionando o roleId
+        roleId: user.roleId, 
         createdAt: user.createdAt
       }))
 
@@ -186,31 +179,26 @@ export default class AuthController {
       }
 
       const userData = request.only(['id', 'fullName', 'email', 'password', 'roleId'])
-      
-      // Verificar se o usuário existe
+   
       const user = await User.find(userData.id)
       if (!user) {
         return response.notFound({ message: 'Usuário não encontrado' })
       }
 
-      // Verificar se o email já está em uso por outro usuário
       if (userData.email !== user.email) {
         const existingUser = await User.findBy('email', userData.email)
         if (existingUser && existingUser.id !== user.id) {
           return response.conflict({ message: 'Este email já está em uso por outro usuário' })
         }
       }
-
-      // Atualizar os dados do usuário
+      
       user.fullName = userData.fullName
       user.email = userData.email
       
-      // Atualizar a senha apenas se fornecida
       if (userData.password && userData.password.trim() !== '') {
         user.password = userData.password
       }
       
-      // Atualizar o roleId se fornecido
       if (userData.roleId) {
         user.roleId = userData.roleId
       }
@@ -253,13 +241,11 @@ export default class AuthController {
 
       const userId = params.id
       
-      // Verificar se o usuário existe
       const user = await User.find(userId)
       if (!user) {
         return response.notFound({ message: 'Usuário não encontrado' })
       }
 
-      // Impedir a exclusão do próprio usuário administrador
       if (user.id === auth.user.id) {
         return response.forbidden({ 
           message: 'Operação não permitida', 
@@ -267,7 +253,6 @@ export default class AuthController {
         })
       }
 
-      // Excluir o usuário
       await user.delete()
 
       return response.ok({
