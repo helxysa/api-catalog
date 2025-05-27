@@ -26,9 +26,9 @@ import DemandasController from '../app/controllers/demandas_controller.js'
 import HistoricoDemandasController from '../app/controllers/historico_demandas_controller.js'
 import SolucoesController from '../app/controllers/solucaos_controller.js'
 import HistoricoSolucoesController from '../app/controllers/historico_solucaos_controller.js'
-import TimesController from '#controllers/times_controller'
 import AuthController from '../app/controllers/auth_controller.js'
 import PerfisController from '../app/controllers/roles_controller.js'
+import TimesController from '#controllers/times_controller'
 
 
 // Rotas de autenticação
@@ -80,12 +80,7 @@ router.group(() => {
   router.delete('/categorias/:id', [CategoriasController, 'destroy'])
   router.get('/proprietarios/:proprietarioId/categorias', [CategoriasController, 'indexByProprietario'])
 
-  router.get('/linguagens', [LinguagensController, 'index'])
-  router.post('/linguagens', [LinguagensController, 'store'])
-  router.get('/linguagens/:id', [LinguagensController, 'show'])
-  router.put('/linguagens/:id', [LinguagensController, 'update'])
-  router.delete('/linguagens/:id', [LinguagensController, 'destroy'])
-  router.get('/proprietarios/:proprietarioId/linguagens', [LinguagensController, 'indexByProprietario'])
+  
 
   router.get('/times', [TimesController, 'index'])
   router.post('/times', [TimesController, 'store'])
@@ -93,6 +88,15 @@ router.group(() => {
   router.put('/times/:id', [TimesController, 'update'])
   router.delete('/times/:id', [TimesController, 'destroy'])
   router.get('/proprietarios/:proprietarioId/times', [TimesController, 'indexByProprietario'])
+
+  router.get('/linguagens', [LinguagensController, 'index'])
+  router.post('/linguagens', [LinguagensController, 'store'])
+  router.get('/linguagens/:id', [LinguagensController, 'show'])
+  router.put('/linguagens/:id', [LinguagensController, 'update'])
+  router.delete('/linguagens/:id', [LinguagensController, 'destroy'])
+  router.get('/proprietarios/:proprietarioId/linguagens', [LinguagensController, 'indexByProprietario'])
+
+
 
   router.get('/tipos', [TiposController, 'index'])
   router.post('/tipos', [TiposController, 'store'])
@@ -153,6 +157,7 @@ router.group(() => {
   router.get('/historico_solucoes', [HistoricoSolucoesController, 'index'])
 
 
+
   router.get('/proprietarios/:proprietarioId/dashboard/solucoes', [SolucoesController, 'getAllByProprietario'])
   router.get('/proprietarios/:proprietarioId/dashboard/demandas', [DemandasController, 'getAllByProprietario'])
   router.get('/proprietarios/:proprietarioId/relatorios/demandas', [DemandasController, 'getAllByProprietario'])
@@ -169,5 +174,7 @@ router.get('/tmp/upload/logo/:filename', async ({ params, response }) => {
     return response.notFound('Image not found')
   }
 })
+
+
 
 
