@@ -171,48 +171,36 @@ export default class ResponsaveisController {
     }
   }
 
-  public async clone({ params, response }: HttpContext) {
+  public async clone({ params, response, auth }: HttpContext) {
     try {
-      // Encontrar o proprietário original
+      await auth.authenticate()
+      const user = auth.user!
+
       const originalProprietario = await Proprietario.findOrFail(params.id)
-      
-      // Criar novo nome e sigla para o clone
-      const newNome = `${originalProprietario.nome} (Cópia)`
-      const newSigla = `${originalProprietario.sigla}_COPY`
 
-      // Preparar o novo logo se existir
-      let newLogoFileName: string | undefined = undefined
-      if (originalProprietario.logo) {
-        const uploadDir = await this.ensureUploadDirectory()
-        newLogoFileName = `copy-${Date.now()}-${originalProprietario.logo}`
-        
-        // Copiar o arquivo de logo
-        try {
-          await copyFile(
-            join(cwd(), 'tmp', 'upload', 'logo', originalProprietario.logo),
-            join(uploadDir, newLogoFileName)
-          )
-        } catch (error) {
-          console.error('Error copying logo:', error)
-          newLogoFileName = undefined
-        }
+      const proprietarioData = originalProprietario.toJSON()
+
+      delete proprietarioData.id
+      delete proprietarioData.createdAt
+      delete proprietarioData.updatedAt
+      delete proprietarioData.userId 
+      proprietarioData.user_id = user.id
+
+      const clonedProprietario = await Proprietario.create(proprietarioData)
+
+      return response.ok({
+        message: 'Proprietário clonado com sucesso!',
+        data: clonedProprietario,
+      })
+    } catch (err) {
+      if (err.code === 'E_ROW_NOT_FOUND') {
+        return response.notFound({ message: 'Proprietário original não encontrado.' })
       }
-
-      // Criar o novo proprietário
-      const newProprietario = await Proprietario.create({
-        nome: newNome,
-        sigla: newSigla,
-        descricao: originalProprietario.descricao,
-        logo: newLogoFileName,
-        user_id: originalProprietario.user_id // Adicionando user_id ao clone
+      console.error('Error cloning proprietario:', err)
+      return response.internalServerError({
+        message: 'Ocorreu um erro ao clonar o proprietário.',
+        error: err.message,
       })
-
-      return response.created({
-        ...newProprietario.toJSON(),
-        logo: this.getLogoUrl(newProprietario.logo)
-      })
-    } catch (error) {
-      return response.badRequest(error.message)
     }
   }
 
