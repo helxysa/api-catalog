@@ -69,6 +69,12 @@ export default class Solucao extends BaseModel {
   declare data_status: string
 
   @column()
+  declare times: JSON
+
+  @column()
+  declare atualizacoes: JSON
+
+  @column()
   declare proprietario_id: number
 
   @column.dateTime({ autoCreate: true })

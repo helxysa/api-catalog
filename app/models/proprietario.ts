@@ -4,7 +4,6 @@ import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import User from './user.js'
 
 export default class Proprietario extends BaseModel {
-
   public static table = 'proprietarios'
 
   @column({ isPrimary: true })
@@ -12,7 +11,7 @@ export default class Proprietario extends BaseModel {
 
   @column()
   declare nome: string
-     
+
   @column()
   declare sigla: string
 
@@ -20,7 +19,7 @@ export default class Proprietario extends BaseModel {
   declare descricao: string
 
   @column()
-  declare logo: string 
+  declare logo: string
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime

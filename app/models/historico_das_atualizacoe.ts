@@ -1,9 +1,9 @@
 import { DateTime } from 'luxon'
-import { BaseModel, belongsTo, column } from '@adonisjs/lucid/orm'
-import Proprietario from './proprietario.js'
+import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import Proprietario from './proprietario.js'
 import Solucao from './solucao.js'
-export default class Time extends BaseModel {
+export default class historicoDasAtualizacoes extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 
@@ -11,13 +11,10 @@ export default class Time extends BaseModel {
   declare nome: string
 
   @column()
-  declare funcao: string
+  declare descricao: string
 
   @column()
-  declare data_inicio: string
-
-  @column()
-  declare data_fim: string
+  declare data_atualizacao: Date
 
   @column()
   declare proprietario_id: number

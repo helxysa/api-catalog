@@ -26,37 +26,46 @@ import DemandasController from '../app/controllers/demandas_controller.js'
 import HistoricoDemandasController from '../app/controllers/historico_demandas_controller.js'
 import SolucoesController from '../app/controllers/solucaos_controller.js'
 import HistoricoSolucoesController from '../app/controllers/historico_solucaos_controller.js'
-import TimesController from '#controllers/times_controller'
 import AuthController from '../app/controllers/auth_controller.js'
+import PerfisController from '../app/controllers/roles_controller.js'
+import TimesController from '#controllers/times_controller'
 
-router.get('/', async () => {
-  return {
-    hello: 'ministério publico',
-  }
-})
 
 // Rotas de autenticação
 router.post('/auth/login', [AuthController, 'login'])
 router.post('/auth/logout', [AuthController, 'logout']).use(middleware.auth())
 router.get('/auth/me', [AuthController, 'me'])
 
-// Rotas protegidas por autenticação
-router.group(
-  () => {
-    // Add the list-users route inside the authenticated group
-    router.get('/auth/list-users', [AuthController, 'listUsers'])
+// Rotas que exigem permissões de administrador ou gerente
+router.group(() => {
+  // Rotas de visualização (acessíveis por admin e manager)
+  router.get('/auth/list-users', [AuthController, 'listUsers'])
+  router.get('/users', [AuthController, 'listUsers'])
+  router.get('/perfils', [PerfisController, 'index'])
+  router.get('/perfils/:id', [PerfisController, 'show'])
+  
+  // Rotas de modificação (apenas admin)
+  router.group(() => {
     router.post('/auth/register', [AuthController, 'register'])
+    router.put('/auth/update-user', [AuthController, 'updateUser'])
+    router.delete('/auth/delete-user/:id', [AuthController, 'deleteUser'])
     
-    // Nova rota para listar todos os usuários (apenas para admin)
-    router.get('/users', [AuthController, 'listUsers'])
-    
-    router.get('/alinhamentos', [AlinhamentosController, 'index'])
-    router.post('/alinhamentos', [AlinhamentosController, 'store'])
-    router.get('/alinhamentos/:id', [AlinhamentosController, 'show'])
-    router.put('/alinhamentos/:id', [AlinhamentosController, 'update'])
-    router.delete('/alinhamentos/:id', [AlinhamentosController, 'destroy'])
-    router.get('/proprietarios/:proprietarioId/alinhamentos', [AlinhamentosController, 'indexByProprietario'])
-    router.get('/desenvolvedores', [DesenvolvedoresController, 'index'])
+    router.post('/perfils', [PerfisController, 'store'])
+    router.put('/perfils/:id', [PerfisController, 'update'])
+    router.delete('/perfils/:id', [PerfisController, 'destroy'])
+  }).use(middleware.adminOnly())
+  
+}).use(middleware.admin())
+
+// Outras rotas protegidas por autenticação
+router.group(() => {
+  router.get('/alinhamentos', [AlinhamentosController, 'index'])
+  router.post('/alinhamentos', [AlinhamentosController, 'store'])
+  router.get('/alinhamentos/:id', [AlinhamentosController, 'show'])
+  router.put('/alinhamentos/:id', [AlinhamentosController, 'update'])
+  router.delete('/alinhamentos/:id', [AlinhamentosController, 'destroy'])
+  router.get('/proprietarios/:proprietarioId/alinhamentos', [AlinhamentosController, 'indexByProprietario'])
+  router.get('/desenvolvedores', [DesenvolvedoresController, 'index'])
 
   router.post('/desenvolvedores', [DesenvolvedoresController, 'store'])
   router.get('/desenvolvedores/:id', [DesenvolvedoresController, 'show'])
@@ -71,14 +80,7 @@ router.group(
   router.delete('/categorias/:id', [CategoriasController, 'destroy'])
   router.get('/proprietarios/:proprietarioId/categorias', [CategoriasController, 'indexByProprietario'])
 
-  router.get('/linguagens', [LinguagensController, 'index'])
-  router.post('/linguagens', [LinguagensController, 'store'])
-  router.get('/linguagens/:id', [LinguagensController, 'show'])
-  router.put('/linguagens/:id', [LinguagensController, 'update'])
-  router.delete('/linguagens/:id', [LinguagensController, 'destroy'])
-  router.get('/proprietarios/:proprietarioId/linguagens', [LinguagensController, 'indexByProprietario'])
-
-
+  
 
   router.get('/times', [TimesController, 'index'])
   router.post('/times', [TimesController, 'store'])
@@ -86,6 +88,13 @@ router.group(
   router.put('/times/:id', [TimesController, 'update'])
   router.delete('/times/:id', [TimesController, 'destroy'])
   router.get('/proprietarios/:proprietarioId/times', [TimesController, 'indexByProprietario'])
+
+  router.get('/linguagens', [LinguagensController, 'index'])
+  router.post('/linguagens', [LinguagensController, 'store'])
+  router.get('/linguagens/:id', [LinguagensController, 'show'])
+  router.put('/linguagens/:id', [LinguagensController, 'update'])
+  router.delete('/linguagens/:id', [LinguagensController, 'destroy'])
+  router.get('/proprietarios/:proprietarioId/linguagens', [LinguagensController, 'indexByProprietario'])
 
 
 
@@ -148,16 +157,15 @@ router.group(
   router.get('/historico_solucoes', [HistoricoSolucoesController, 'index'])
 
 
+
   router.get('/proprietarios/:proprietarioId/dashboard/solucoes', [SolucoesController, 'getAllByProprietario'])
   router.get('/proprietarios/:proprietarioId/dashboard/demandas', [DemandasController, 'getAllByProprietario'])
   router.get('/proprietarios/:proprietarioId/relatorios/demandas', [DemandasController, 'getAllByProprietario'])
   router.get('/proprietarios/:proprietarioId/dashboard/todas-solucoes', [SolucoesController, 'getAllSolucoesByProprietario'])
   router.get('/users/:userId/proprietarios', [ProprietariosController, 'getByUserId'])
-
   }
 ).use(middleware.auth())
 
-// Serve logo images
 router.get('/tmp/upload/logo/:filename', async ({ params, response }) => {
   try {
     const filePath = join(cwd(), 'tmp', 'upload', 'logo', params.filename)
@@ -166,5 +174,7 @@ router.get('/tmp/upload/logo/:filename', async ({ params, response }) => {
     return response.notFound('Image not found')
   }
 })
+
+
 
 
