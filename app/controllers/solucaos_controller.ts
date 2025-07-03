@@ -57,9 +57,7 @@ export default class SolucoesController {
         'status_id',
         'categoria_id',
         'data_status',
-        'proprietario_id',
-        'times',
-        'atualizacoes'
+        'proprietario_id'
       ])
 
       // Log para debug
@@ -135,7 +133,7 @@ export default class SolucoesController {
         'nome', 'sigla', 'descricao', 'versao', 'repositorio',
         'link', 'tipo_id', 'linguagem_id', 'desenvolvedor_id',
         'responsavel_id', 'status_id', 'categoria_id', 'andamento',
-        'data_status', 'demanda_id', 'criticidade', 'times', 'atualizacoes'
+        'data_status', 'demanda_id', 'criticidade'  // Adicionado 'criticidade' aqui
       ])
 
       const mudancas = Object.entries(data)

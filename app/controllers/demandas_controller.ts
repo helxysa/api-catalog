@@ -5,22 +5,39 @@ import type { HttpContext } from '@adonisjs/core/http'
 import HistoricoDemanda from '../models/historico_demanda.js'
 
 export default class DemandasController {
-  public async index({ response, request }: HttpContext) {
+  public async index({ params, request, response }: HttpContext) {
     try {
+      const proprietarioId = params.id
+
+      if (!proprietarioId) {
+        return response.badRequest({ message: 'O ID do proprietário é obrigatório.' })
+      }
+
       const page = request.input('page', 1)
-      const limit = request.input('limit', 15)
+      const limit = request.input('limit', 10)
 
       const demandas = await Demanda.query()
-        .preload('proprietario')
-        .preload('alinhamento')
-        .preload('prioridade')
-        .preload('responsavel')
-        .preload('status')
+        .where('proprietario_id', proprietarioId)
+        .orderBy('id', 'asc')
+        .preload('alinhamento', (query) => {
+          query.select('id', 'nome')
+        })
+        .preload('prioridade', (query) => {
+          query.select('id', 'nome')
+        })
+        .preload('responsavel', (query) => {
+          query.select('id', 'nome')
+        })
+        .preload('status', (query) => {
+          query.select('id', 'nome')
+        })
         .paginate(page, limit)
 
       return response.ok(demandas)
+
     } catch (error) {
-      return response.badRequest(error.message)
+      console.error(error)
+      return response.internalServerError({ message: 'Ocorreu um erro interno ao buscar as demandas.' })
     }
   }
 
@@ -64,8 +81,8 @@ export default class DemandasController {
     try {
       const demanda = await Demanda.findOrFail(params.id)
       const data = request.only([
-        'nome', 'sigla', 'descricao', 'demandante', 'fator_gerador', 
-        'alinhamento_id', 'prioridade_id', 'responsavel_id', 
+        'nome', 'sigla', 'descricao', 'demandante', 'fator_gerador',
+        'alinhamento_id', 'prioridade_id', 'responsavel_id',
         'status_id', 'data_status', 'link'  // Adicionado o campo link
       ])
 

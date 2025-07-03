@@ -133,8 +133,7 @@ router.group(() => {
   router.post('/proprietarios/:id/clone', [ProprietariosController, 'clone'])
 
   router.get('/demandas/all', [DemandasController, 'all'])
-
-  router.get('/demandas', [DemandasController, 'index'])
+  router.get('/demandas/busca/:id', [DemandasController, 'index'])
   router.post('/demandas', [DemandasController, 'store'])
   router.get('/demandas/:id', [DemandasController, 'show'])
   router.put('/demandas/:id', [DemandasController, 'update'])
@@ -164,7 +163,7 @@ router.group(() => {
   router.get('/proprietarios/:proprietarioId/dashboard/todas-solucoes', [SolucoesController, 'getAllSolucoesByProprietario'])
   router.get('/users/:userId/proprietarios', [ProprietariosController, 'getByUserId'])
   }
-).use(middleware.auth())
+)
 
 router.get('/tmp/upload/logo/:filename', async ({ params, response }) => {
   try {
