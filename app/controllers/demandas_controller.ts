@@ -1,22 +1,48 @@
 /* eslint-disable */
-// hello-world/app/controllers/demandas_controller.ts
 import Demanda from '../models/demanda.js'
 import type { HttpContext } from '@adonisjs/core/http'
 import HistoricoDemanda from '../models/historico_demanda.js'
 
 export default class DemandasController {
-  public async index({ response, request }: HttpContext) {
+  public async index({ response, request, params }: HttpContext) {
     try {
       const page = request.input('page', 1)
       const limit = request.input('limit', 15)
+      const proprietarioId = params.id
 
-      const demandas = await Demanda.query()
+      const query = Demanda.query()
+
+      if (proprietarioId) {
+        query.where('proprietario_id', proprietarioId)
+      }
+
+      const demandas = await query
         .preload('proprietario')
         .preload('alinhamento')
         .preload('prioridade')
         .preload('responsavel')
         .preload('status')
+        .orderBy('id', 'asc')
         .paginate(page, limit)
+
+      return response.ok(demandas)
+    } catch (error) {
+      return response.badRequest(error.message)
+    }
+  }
+
+
+  public async demandasAll({ response }: HttpContext) {
+    try {
+      const query = Demanda.query()
+
+      const demandas = await query
+        .preload('proprietario')
+        .preload('alinhamento')
+        .preload('prioridade')
+        .preload('responsavel')
+        .preload('status')
+        .orderBy('id', 'asc')
 
       return response.ok(demandas)
     } catch (error) {
