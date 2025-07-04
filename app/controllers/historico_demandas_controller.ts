@@ -50,4 +50,15 @@ export default class HistoricoDemandasController {
       return response.badRequest(error.message)
     }
   }
+
+  public async indexByDemanda({ params, response }: HttpContext) {
+    try {
+      const historicos = await HistoricoDemanda.query()
+        .where('demanda_id', params.demandaId)
+        .orderBy('created_at', 'desc')
+      return response.ok(historicos)
+    } catch (error) {
+      return response.badRequest({ message: 'Erro ao buscar histórico da demanda', error: error.message })
+    }
+  }
 }

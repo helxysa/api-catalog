@@ -132,11 +132,10 @@ router.group(() => {
   router.delete('/proprietarios/:id', [ProprietariosController, 'destroy'])
   router.post('/proprietarios/:id/clone', [ProprietariosController, 'clone'])
 
-  router.get('/demandas/all', [DemandasController, 'all'])
-
-  router.get('/demandas', [DemandasController, 'index'])
-  router.post('/demandas', [DemandasController, 'store'])
+  router.get('/demandas/all', [DemandasController, 'demandasAll'])
+  router.get('/demandas/busca/:id', [DemandasController, 'index'])
   router.get('/demandas/:id', [DemandasController, 'show'])
+  router.get('/demandas/:demandaId/historico', [HistoricoDemandasController, 'indexByDemanda'])
   router.put('/demandas/:id', [DemandasController, 'update'])
   router.delete('/demandas/:id', [DemandasController, 'destroy'])
   router.get('/proprietarios/:proprietarioId/demandas', [DemandasController, 'indexByProprietario'])
