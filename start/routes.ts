@@ -43,18 +43,18 @@ router.group(() => {
   router.get('/users', [AuthController, 'listUsers'])
   router.get('/perfils', [PerfisController, 'index'])
   router.get('/perfils/:id', [PerfisController, 'show'])
-  
+
   // Rotas de modificação (apenas admin)
   router.group(() => {
     router.post('/auth/register', [AuthController, 'register'])
     router.put('/auth/update-user', [AuthController, 'updateUser'])
     router.delete('/auth/delete-user/:id', [AuthController, 'deleteUser'])
-    
+
     router.post('/perfils', [PerfisController, 'store'])
     router.put('/perfils/:id', [PerfisController, 'update'])
     router.delete('/perfils/:id', [PerfisController, 'destroy'])
   }).use(middleware.adminOnly())
-  
+
 }).use(middleware.admin())
 
 // Outras rotas protegidas por autenticação
@@ -80,7 +80,7 @@ router.group(() => {
   router.delete('/categorias/:id', [CategoriasController, 'destroy'])
   router.get('/proprietarios/:proprietarioId/categorias', [CategoriasController, 'indexByProprietario'])
 
-  
+
 
   router.get('/times', [TimesController, 'index'])
   router.post('/times', [TimesController, 'store'])
@@ -134,6 +134,7 @@ router.group(() => {
 
   router.get('/demandas/all', [DemandasController, 'demandasAll'])
   router.get('/demandas/busca/:id', [DemandasController, 'index'])
+  router.post('/demandas', [DemandasController, 'store'])
   router.get('/demandas/:id', [DemandasController, 'show'])
   router.get('/demandas/:demandaId/historico', [HistoricoDemandasController, 'indexByDemanda'])
   router.put('/demandas/:id', [DemandasController, 'update'])
@@ -162,7 +163,7 @@ router.group(() => {
   router.get('/proprietarios/:proprietarioId/relatorios/demandas', [DemandasController, 'getAllByProprietario'])
   router.get('/proprietarios/:proprietarioId/dashboard/todas-solucoes', [SolucoesController, 'getAllSolucoesByProprietario'])
   router.get('/users/:userId/proprietarios', [ProprietariosController, 'getByUserId'])
-  }
+}
 ).use(middleware.auth())
 
 router.get('/tmp/upload/logo/:filename', async ({ params, response }) => {
