@@ -65,10 +65,13 @@ export default class AlinhamentosController {
   }
 
 
-  public async indexByProprietario({ params, response }: HttpContext) {
+  public async indexByProprietario({ params, response, request }: HttpContext) {
     try {
+      const page = request.input('page', 1)
+      const limit = request.input('limit', 15)
+      
       const alinhamentos = await Alinhamento.query()
-        .where('proprietario_id', params.proprietarioId)
+        .where('proprietario_id', params.proprietarioId).orderBy('id', 'asc').paginate(page, limit);
       return response.ok(alinhamentos)
     } catch (error) {
       return response.badRequest(error.message)

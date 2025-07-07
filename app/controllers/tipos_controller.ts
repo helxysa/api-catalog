@@ -49,10 +49,12 @@ export default class LinguagensController {
     }
   }
 
-  public async indexByProprietario({ params, response }: HttpContext) {
+  public async indexByProprietario({ params, response, request }: HttpContext) {
     try {
+      const page = request.input('page', 1)
+      const limit = request.input('limit', 15)
       const tipos = await Tipo.query()
-        .where('proprietario_id', params.proprietarioId)
+        .where('proprietario_id', params.proprietarioId).orderBy('id', 'asc').paginate(page, limit)
       return response.ok(tipos)
     } catch (error) {
       return response.badRequest(error.message)

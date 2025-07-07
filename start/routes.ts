@@ -73,7 +73,7 @@ router.group(() => {
   router.delete('/desenvolvedores/:id', [DesenvolvedoresController, 'destroy'])
   router.get('/proprietarios/:proprietarioId/desenvolvedores', [DesenvolvedoresController, 'indexByProprietario'])
 
-  router.get('/categorias', [CategoriasController, 'index'])
+  router.get('/categorias/buscar/:id', [CategoriasController, 'index'])
   router.post('/categorias', [CategoriasController, 'store'])
   router.get('/categorias/:id', [CategoriasController, 'show'])
   router.put('/categorias/:id', [CategoriasController, 'update'])
@@ -164,7 +164,7 @@ router.group(() => {
   router.get('/proprietarios/:proprietarioId/dashboard/todas-solucoes', [SolucoesController, 'getAllSolucoesByProprietario'])
   router.get('/users/:userId/proprietarios', [ProprietariosController, 'getByUserId'])
 }
-).use(middleware.auth())
+)
 
 router.get('/tmp/upload/logo/:filename', async ({ params, response }) => {
   try {

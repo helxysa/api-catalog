@@ -61,10 +61,12 @@ export default class CategoriasController {
     }
   }
 
-  public async indexByProprietario({ params, response }: HttpContext) {
+  public async indexByProprietario({ params, response, request }: HttpContext) {
     try {
+      const page = request.input('page', 1);
+      const limit = request.input('limit', 10);
       const categorias = await Categoria.query()
-        .where('proprietario_id', params.proprietarioId)
+        .where('proprietario_id', params.proprietarioId).orderBy('id', 'asc').paginate(page, limit);
       return response.ok(categorias)
     } catch (error) {
       return response.badRequest(error.message)
