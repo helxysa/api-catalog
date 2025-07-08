@@ -57,7 +57,6 @@ router.group(() => {
 
 }).use(middleware.admin())
 
-// Outras rotas protegidas por autenticação
 router.group(() => {
   router.get('/alinhamentos', [AlinhamentosController, 'index'])
   router.post('/alinhamentos', [AlinhamentosController, 'store'])
@@ -164,7 +163,7 @@ router.group(() => {
   router.get('/proprietarios/:proprietarioId/dashboard/todas-solucoes', [SolucoesController, 'getAllSolucoesByProprietario'])
   router.get('/users/:userId/proprietarios', [ProprietariosController, 'getByUserId'])
 }
-)
+).use(middleware.auth())
 
 router.get('/tmp/upload/logo/:filename', async ({ params, response }) => {
   try {
@@ -178,3 +177,7 @@ router.get('/tmp/upload/logo/:filename', async ({ params, response }) => {
 
 
 
+
+function use(auth: any): import("@adonisjs/http-server/types").OneOrMore<import("@adonisjs/http-server/types").MiddlewareFn | import("@adonisjs/http-server/types").ParsedNamedMiddleware> {
+  throw new Error('Function not implemented.')
+}

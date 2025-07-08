@@ -35,7 +35,6 @@ export default class ResponsaveisController {
         userMap[user.id] = user
       })
       
-      // Montar o resultado com as URLs de logo e informações de usuário
       const proprietariosWithUrls = proprietarios.map(proprietario => {
         const proprietarioJson = proprietario.toJSON() 
         const userId = proprietario.user_id
