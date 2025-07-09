@@ -180,8 +180,11 @@ export default class SolucoesController {
     }
   }
 
-  public async indexByProprietario({ params, response }: HttpContext) {
+  public async indexByProprietario({ params, response, request }: HttpContext) {
     try {
+      const page = request.input('page');
+      const limit = request.input('limit');
+      
       if (!params.proprietarioId) {
         return response.status(400).json({
           message: 'ID do proprietário é obrigatório'
@@ -195,7 +198,7 @@ export default class SolucoesController {
         .preload('desenvolvedor')
         .preload('responsavel')
         .preload('status')
-        .preload('categoria');
+        .preload('categoria').orderBy('id', 'asc').paginate(page, limit)
 
       return response.ok(solucoes);
     } catch (error) {
@@ -264,7 +267,6 @@ export default class SolucoesController {
     try {
       const proprietarioId = params.proprietarioId;
 
-      // Usando o ORM para buscar todas as soluções com seus relacionamentos
       const solucoes = await Solucao.query()
         .where('proprietario_id', proprietarioId)
         .preload('demanda')
@@ -273,8 +275,7 @@ export default class SolucoesController {
         .preload('responsavel')
         .preload('status')
         .preload('categoria')
-        .debug(true) // Loga a query no console
-        .exec();
+        .debug(true) 
 
 
       // Verifica se encontrou soluções
@@ -307,7 +308,6 @@ export default class SolucoesController {
         return response.badRequest({ message: 'proprietario_id é obrigatório' });
       }
 
-      // Busca e atualiza todas as soluções sem proprietário_id
       const solucoes = await Solucao.query()
         .whereNull('proprietario_id')
         .update({ proprietario_id: proprietarioId });

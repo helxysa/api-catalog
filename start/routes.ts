@@ -163,7 +163,7 @@ router.group(() => {
   router.get('/proprietarios/:proprietarioId/dashboard/todas-solucoes', [SolucoesController, 'getAllSolucoesByProprietario'])
   router.get('/users/:userId/proprietarios', [ProprietariosController, 'getByUserId'])
 }
-).use(middleware.auth())
+)
 
 router.get('/tmp/upload/logo/:filename', async ({ params, response }) => {
   try {
